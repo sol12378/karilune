@@ -1,0 +1,67 @@
+import 'package:carilune/models/ad.dart';
+import 'package:carilune/providers/account_provider.dart';
+import 'package:carilune/widgets/ad_card_consumer.dart';
+import 'package:carilune/widgets/ad_grid.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  Future<ProviderScope> scopedApp(Widget child) async {
+    final prefs = await SharedPreferences.getInstance();
+    return ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: MaterialApp(home: Scaffold(body: child)),
+    );
+  }
+
+  final testAd = Ad(
+    id: 'overflow-test',
+    companyName: 'テスト店舗名',
+    catchCopy: 'テストキャッチコピーが入ります',
+    prText: 'PR文',
+    thumbnailAssetPath: 'assets/images/placeholder_ad_01.png',
+    category: '飲食店',
+    prefecture: '愛知県',
+    startDate: DateTime.now(),
+    distributionDays: 30,
+  );
+
+  testWidgets('AdCardConsumer does not overflow at narrow width', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(240, 400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final app = await scopedApp(
+      SizedBox(
+        width: 220,
+        height: 300,
+        child: AdCardConsumer(ad: testAd),
+      ),
+    );
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AdGridView renders without overflow', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 600));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final app = await scopedApp(
+      AdGridView.builder(
+        itemCount: 2,
+        itemBuilder: (context, index) => AdCardConsumer(ad: testAd),
+      ),
+    );
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+}
