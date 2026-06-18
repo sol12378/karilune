@@ -7,9 +7,10 @@ import '../../providers/ad_list_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../widgets/ad_card_distributor.dart';
 import '../../widgets/ad_grid.dart';
-import '../../widgets/admin_shell.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/operator/operator_mode.dart';
+import '../../widgets/operator/operator_shell.dart';
 
 class DistributorFavoritesPage extends ConsumerWidget {
   const DistributorFavoritesPage({super.key});
@@ -22,14 +23,11 @@ class DistributorFavoritesPage extends ConsumerWidget {
         .where((ad) => favoriteIds.contains(ad.id))
         .toList();
     final location = GoRouterState.of(context).matchedLocation;
-    final selectedNav = navIndexForLocation(distributorNavItems, location);
 
-    return AdminShell(
+    return OperatorShell(
       currentLocation: location,
+      mode: OperatorMode.distributor,
       navItems: distributorNavItems,
-      selectedNavIndex: selectedNav,
-      onNavTap: (index) => context.go(distributorNavItems[index].location),
-      title: 'お気に入り',
       child: ads.isEmpty
           ? const EmptyState(
               icon: Icons.favorite_border,

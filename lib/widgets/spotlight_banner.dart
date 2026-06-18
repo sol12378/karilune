@@ -6,6 +6,10 @@ import '../providers/ad_list_provider.dart';
 import '../theme/app_theme.dart';
 import 'ad_thumbnail.dart';
 
+/// 横スクロールの注目広告バナー（旧実装）。
+///
+/// 会員向けは [FeaturedAdsCarousel] を使用すること。
+@Deprecated('Use FeaturedAdsCarousel for member home')
 class SpotlightBanner extends ConsumerWidget {
   const SpotlightBanner({
     super.key,
@@ -45,7 +49,9 @@ class SpotlightBanner extends ConsumerWidget {
             separatorBuilder: (_, __) => const SizedBox(width: 10),
             itemBuilder: (context, index) {
               final ad = ads[index];
-              return GestureDetector(
+              return RepaintBoundary(
+                key: ValueKey(ad.id),
+                child: GestureDetector(
                 onTap: () => context.push('/ads/${ad.id}?from=$linkFrom'),
                 child: SizedBox(
                   width: 220,
@@ -89,6 +95,7 @@ class SpotlightBanner extends ConsumerWidget {
                     ),
                   ),
                 ),
+              ),
               );
             },
           ),

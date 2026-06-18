@@ -6,6 +6,8 @@ import '../../models/account.dart';
 import '../../providers/account_provider.dart';
 import '../../widgets/admin_shell.dart';
 import '../../widgets/app_shell.dart';
+import '../../widgets/operator/operator_mode.dart';
+import '../../widgets/operator/operator_shell.dart';
 
 class AccountPage extends ConsumerStatefulWidget {
   const AccountPage({
@@ -15,7 +17,9 @@ class AccountPage extends ConsumerStatefulWidget {
     required this.selectedNavIndex,
     required this.onNavTap,
     this.useAdminShell = false,
+    this.useOperatorShell = false,
     this.shellTitle = 'アカウント',
+    this.showDemoAdminLink = false,
   });
 
   final StateNotifierProvider<AccountNotifier, Account> accountProvider;
@@ -23,7 +27,9 @@ class AccountPage extends ConsumerStatefulWidget {
   final int selectedNavIndex;
   final ValueChanged<int> onNavTap;
   final bool useAdminShell;
+  final bool useOperatorShell;
   final String shellTitle;
+  final bool showDemoAdminLink;
 
   @override
   ConsumerState<AccountPage> createState() => _AccountPageState();
@@ -62,77 +68,127 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     final account = ref.watch(widget.accountProvider);
     _ensureControllers(account);
 
-    final form = Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          CircleAvatar(
-            radius: 36,
-            child: Text(
-              account.companyName.isNotEmpty
-                  ? account.companyName.characters.first
-                  : '?',
-              style: const TextStyle(fontSize: 28),
-            ),
-          ),
-          const SizedBox(height: 24),
-          TextFormField(
-            controller: _companyName,
-            decoration: const InputDecoration(
-              labelText: '会社名 / お名前',
-              border: OutlineInputBorder(),
-            ),
-            validator: (v) =>
-                v == null || v.trim().isEmpty ? '必須項目です' : null,
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _companyUrl,
-            decoration: const InputDecoration(
-              labelText: 'Webサイト',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _tel,
-            decoration: const InputDecoration(
-              labelText: '電話番号',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextFormField(
-            controller: _contactName,
-            decoration: const InputDecoration(
-              labelText: '担当者名',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: () async {
-              if (!_formKey.currentState!.validate()) return;
-              await ref.read(widget.accountProvider.notifier).update(
-                    Account(
-                      companyName: _companyName.text.trim(),
-                      companyUrl: _companyUrl.text.trim(),
-                      tel: _tel.text.trim(),
-                      contactName: _contactName.text.trim(),
+    final formCard = Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Card(
+          margin: const EdgeInsets.all(24),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: CircleAvatar(
+                      radius: 36,
+                      child: Text(
+                        account.companyName.isNotEmpty
+                            ? account.companyName.characters.first
+                            : '?',
+                        style: const TextStyle(fontSize: 28),
+                      ),
                     ),
-                  );
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('プロフィールを保存しました')),
-                );
-              }
-            },
-            child: const Text('保存する'),
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _companyName,
+                    decoration: const InputDecoration(
+                      labelText: '会社名 / お名前',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                    validator: (v) =>
+                        v == null || v.trim().isEmpty ? '必須項目です' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _companyUrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Webサイト',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _tel,
+                    decoration: const InputDecoration(
+                      labelText: '電話番号',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _contactName,
+                    decoration: const InputDecoration(
+                      labelText: '担当者名',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FilledButton(
+                      onPressed: () async {
+                        if (!_formKey.currentState!.validate()) return;
+                        await ref.read(widget.accountProvider.notifier).update(
+                              Account(
+                                companyName: _companyName.text.trim(),
+                                companyUrl: _companyUrl.text.trim(),
+                                tel: _tel.text.trim(),
+                                contactName: _contactName.text.trim(),
+                              ),
+                            );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('プロフィールを保存しました'),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text('保存する'),
+                    ),
+                  ),
+                  if (widget.showDemoAdminLink) ...[
+                    const SizedBox(height: 24),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.admin_panel_settings_outlined),
+                      title: const Text('広告管理ダッシュボード'),
+                      subtitle: const Text('配信・投稿の管理（デモ用）'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.go('/admin/dashboard'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
     );
+
+    final body = SingleChildScrollView(
+      child: formCard,
+    );
+
+    if (widget.useOperatorShell) {
+      final location = GoRouterState.of(context).matchedLocation;
+      return OperatorShell(
+        currentLocation: location,
+        mode: OperatorModeX.fromLocation(location),
+        navItems: widget.navItems,
+        title: widget.shellTitle,
+        child: body,
+      );
+    }
 
     if (widget.useAdminShell) {
       return AdminShell(
@@ -141,7 +197,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
         selectedNavIndex: widget.selectedNavIndex,
         onNavTap: widget.onNavTap,
         title: widget.shellTitle,
-        child: form,
+        child: body,
       );
     }
 
@@ -150,7 +206,7 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       navItems: widget.navItems,
       selectedNavIndex: widget.selectedNavIndex,
       onNavTap: widget.onNavTap,
-      child: form,
+      child: body,
     );
   }
 }

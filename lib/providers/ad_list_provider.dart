@@ -14,12 +14,50 @@ final adListProvider = Provider<List<Ad>>((ref) {
   return ref.watch(adRepositoryProvider);
 });
 
-/// 投稿者向け広告（自社・管理対象）
-final advertiserAdsProvider = Provider<List<Ad>>((ref) {
-  return ref
+/// ID 指定で単一広告を取得（詳細画面などで Repository 全体の watch を避ける）
+final adByIdProvider = Provider.family<Ad?, String>((ref, adId) {
+  final ads = ref.watch(adRepositoryProvider);
+  for (final ad in ads) {
+    if (ad.id == adId) {
+      return ad;
+    }
+  }
+  return null;
+});
+
+class AdvertiserAdsSplit {
+  const AdvertiserAdsSplit({
+    required this.all,
+    required this.active,
+    required this.ended,
+  });
+
+  final List<Ad> all;
+  final List<Ad> active;
+  final List<Ad> ended;
+}
+
+/// 投稿者向け広告を1回の走査で active / ended に分割
+final advertiserAdsSplitProvider = Provider<AdvertiserAdsSplit>((ref) {
+  final all = ref
       .watch(adRepositoryProvider)
       .where((ad) => ad.isAdvertiserAd || ad.isOwnAd)
       .toList();
+  final active = <Ad>[];
+  final ended = <Ad>[];
+  for (final ad in all) {
+    if (ad.isEnded) {
+      ended.add(ad);
+    } else {
+      active.add(ad);
+    }
+  }
+  return AdvertiserAdsSplit(all: all, active: active, ended: ended);
+});
+
+/// 投稿者向け広告（自社・管理対象）
+final advertiserAdsProvider = Provider<List<Ad>>((ref) {
+  return ref.watch(advertiserAdsSplitProvider).all;
 });
 
 final selectedCategoryProvider = StateProvider<String>((ref) => 'すべて');
@@ -55,25 +93,25 @@ List<Ad> applySort(List<Ad> ads, SortOrder order) {
   return sorted;
 }
 
-final filteredAdsProvider = Provider<List<Ad>>((ref) {
+/// カテゴリ・地域フィルタのみ適用（会員・配信者で共有）
+final categoryPrefectureFilteredAdsProvider = Provider<List<Ad>>((ref) {
   final ads = ref.watch(adListProvider);
   final category = ref.watch(selectedCategoryProvider);
   final prefecture = ref.watch(selectedPrefectureProvider);
-
   return applyCategoryPrefectureFilter(ads, category, prefecture);
 });
 
+final filteredAdsProvider = categoryPrefectureFilteredAdsProvider;
+
 final memberAdsProvider = Provider<List<Ad>>((ref) {
-  final ads = ref.watch(adListProvider);
-  final category = ref.watch(selectedCategoryProvider);
-  final prefecture = ref.watch(selectedPrefectureProvider);
+  final filtered = ref.watch(categoryPrefectureFilteredAdsProvider);
   final sortOrder = ref.watch(sortOrderProvider);
 
-  final filtered = applyCategoryPrefectureFilter(ads, category, prefecture)
+  final active = filtered
       .where((ad) => ad.isDistributing && ad.isActive)
       .toList();
 
-  return applySort(filtered, sortOrder);
+  return applySort(active, sortOrder);
 });
 
 final spotlightAdsProvider = Provider<List<Ad>>((ref) {
@@ -85,17 +123,17 @@ final spotlightAdsProvider = Provider<List<Ad>>((ref) {
 
 final distributorSpotlightAdsProvider = Provider<List<Ad>>((ref) {
   return ref
-      .watch(filteredAdsProvider)
+      .watch(categoryPrefectureFilteredAdsProvider)
       .where((ad) => ad.hasSpotlightOption)
       .toList();
 });
 
 final endedAdvertiserAdsProvider = Provider<List<Ad>>((ref) {
-  return ref.watch(advertiserAdsProvider).where((ad) => ad.isEnded).toList();
+  return ref.watch(advertiserAdsSplitProvider).ended;
 });
 
 final activeAdvertiserAdsProvider = Provider<List<Ad>>((ref) {
-  return ref.watch(advertiserAdsProvider).where((ad) => !ad.isEnded).toList();
+  return ref.watch(advertiserAdsSplitProvider).active;
 });
 
 final distributorHistoryAdsProvider = Provider<List<Ad>>((ref) {

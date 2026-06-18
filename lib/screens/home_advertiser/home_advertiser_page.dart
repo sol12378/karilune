@@ -4,86 +4,33 @@ import 'package:go_router/go_router.dart';
 
 import '../../models/ad.dart';
 import '../../providers/ad_list_provider.dart';
-import '../../widgets/admin_shell.dart';
+import '../../providers/operator_stats_provider.dart';
+import '../../widgets/ad_card_advertiser.dart';
+import '../../widgets/ad_grid.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/stats_row.dart';
-import '../advertiser/advertiser_history_page.dart';
+import '../../widgets/operator/operator_home_layout.dart';
+import '../../widgets/operator/operator_mode.dart';
+import '../../widgets/operator/operator_shell.dart';
 
-class HomeAdvertiserPage extends ConsumerStatefulWidget {
+class HomeAdvertiserPage extends ConsumerWidget {
   const HomeAdvertiserPage({super.key});
 
   @override
-  ConsumerState<HomeAdvertiserPage> createState() =>
-      _HomeAdvertiserPageState();
-}
-
-class _HomeAdvertiserPageState extends ConsumerState<HomeAdvertiserPage>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ads = ref.watch(advertiserAdsProvider);
-    final activeAds = ref.watch(activeAdvertiserAdsProvider);
-    final historyAds = ref.watch(endedAdvertiserAdsProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).matchedLocation;
-    final selectedNav = navIndexForLocation(advertiserNavItems, location);
 
-    final distributorCount =
-        ads.fold<int>(0, (sum, ad) => sum + ad.distributorCount);
-    final viewCount = ads.fold<int>(0, (sum, ad) => sum + ad.viewCount);
-
-    return AdminShell(
+    return OperatorShell(
       currentLocation: location,
+      mode: OperatorMode.advertiser,
       navItems: advertiserNavItems,
-      selectedNavIndex: selectedNav,
-      onNavTap: (index) => context.go(advertiserNavItems[index].location),
-      title: '広告投稿',
       child: Stack(
         children: [
-          Column(
-            children: [
-              StatsRow(
-                adCount: ads.length,
-                distributorCount: distributorCount,
-                viewCount: viewCount,
-              ),
-              TabBar(
-                controller: _tabController,
-                tabs: const [
-                  Tab(text: 'ホーム'),
-                  Tab(text: '過去履歴'),
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _AdList(
-                      ads: activeAds,
-                      emptyMessage: '配信中・予定の広告はありません',
-                    ),
-                    _AdList(
-                      ads: historyAds,
-                      emptyMessage: '過去の広告はありません',
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          OperatorHomeLayout(
+            showRecommended: false,
+            showCategorySidebar: false,
+            statsProvider: advertiserPerformanceProvider,
+            buildMain: (width) => AdvertiserAdsGrid(width: width),
           ),
           Positioned(
             right: 16,
@@ -100,24 +47,70 @@ class _HomeAdvertiserPageState extends ConsumerState<HomeAdvertiserPage>
   }
 }
 
-class _AdList extends StatelessWidget {
-  const _AdList({
-    required this.ads,
-    required this.emptyMessage,
-  });
+class AdvertiserAdsGrid extends ConsumerWidget {
+  const AdvertiserAdsGrid({super.key, required this.width});
 
-  final List<Ad> ads;
-  final String emptyMessage;
+  final double width;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ads = ref.watch(activeAdvertiserAdsProvider);
+
     if (ads.isEmpty) {
-      return EmptyState(
-        icon: Icons.campaign_outlined,
-        title: emptyMessage,
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 48),
+        child: EmptyState(
+          icon: Icons.campaign_outlined,
+          title: '配信中・予定の広告はありません',
+          description: '右下のボタンから新規広告を作成できます。',
+        ),
       );
     }
 
-    return AdvertiserAdGrid(ads: ads);
+    return AdGridView.builder(
+      width: width,
+      shrinkWrap: true,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+      itemCount: ads.length,
+      itemBuilder: (context, index) {
+        final ad = ads[index];
+        return RepaintBoundary(
+          key: ValueKey(ad.id),
+          child: AdCardAdvertiser(
+            ad: ad,
+            onTap: () => context.push('/ads/${ad.id}?from=advertiser'),
+            onEdit: () => context.push('/advertiser/ads/${ad.id}/edit'),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class AdvertiserAdGrid extends ConsumerWidget {
+  const AdvertiserAdGrid({
+    super.key,
+    required this.ads,
+    this.padding = const EdgeInsets.fromLTRB(16, 16, 16, 88),
+  });
+
+  final List<Ad> ads;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AdGridView.builder(
+      padding: padding,
+      shrinkWrap: true,
+      itemCount: ads.length,
+      itemBuilder: (context, index) {
+        final ad = ads[index];
+        return AdCardAdvertiser(
+          ad: ad,
+          onTap: () => context.push('/ads/${ad.id}?from=advertiser'),
+          onEdit: () => context.push('/advertiser/ads/${ad.id}/edit'),
+        );
+      },
+    );
   }
 }

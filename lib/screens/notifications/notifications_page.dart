@@ -8,6 +8,8 @@ import '../../models/notification.dart';
 import '../../widgets/admin_shell.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/operator/operator_mode.dart';
+import '../../widgets/operator/operator_shell.dart';
 
 class NotificationsPage extends ConsumerStatefulWidget {
   const NotificationsPage({
@@ -18,6 +20,7 @@ class NotificationsPage extends ConsumerStatefulWidget {
     this.selectedNavIndex = 0,
     this.onNavTap,
     this.useAdminShell = false,
+    this.useOperatorShell = false,
     this.shellTitle,
   });
 
@@ -27,6 +30,7 @@ class NotificationsPage extends ConsumerStatefulWidget {
   final int selectedNavIndex;
   final ValueChanged<int>? onNavTap;
   final bool useAdminShell;
+  final bool useOperatorShell;
   final String? shellTitle;
 
   @override
@@ -105,6 +109,17 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
               );
             },
           );
+
+    if (widget.useOperatorShell) {
+      final location = GoRouterState.of(context).matchedLocation;
+      return OperatorShell(
+        currentLocation: location,
+        mode: OperatorModeX.fromLocation(location),
+        navItems: widget.navItems,
+        title: widget.shellTitle ?? '通知',
+        child: body,
+      );
+    }
 
     if (widget.useAdminShell) {
       return AdminShell(
