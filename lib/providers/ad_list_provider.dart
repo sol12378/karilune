@@ -117,6 +117,15 @@ final memberAdsProvider = Provider<List<Ad>>((ref) {
   return applySort(active, sortOrder);
 });
 
+/// 配信中かつ有効な広告（カテゴリ・地域フィルタなし）。
+/// 注目カルーセル等、フィルタ独立の掲載枠向け。
+final activeDistributingAdsProvider = Provider<List<Ad>>((ref) {
+  return ref
+      .watch(adListProvider)
+      .where((ad) => ad.isDistributing && ad.isActive)
+      .toList();
+});
+
 final spotlightAdsProvider = Provider<List<Ad>>((ref) {
   final placements = ref
       .watch(featuredPlacementRepositoryProvider)
@@ -124,7 +133,7 @@ final spotlightAdsProvider = Provider<List<Ad>>((ref) {
       .toList();
   return FeaturedCarouselResolver.resolve(
     placements: placements,
-    catalog: ref.watch(memberAdsProvider),
+    catalog: ref.watch(activeDistributingAdsProvider),
   );
 });
 
@@ -137,7 +146,7 @@ final distributorSpotlightAdsProvider = Provider<List<Ad>>((ref) {
       .toList();
   return FeaturedCarouselResolver.resolve(
     placements: placements,
-    catalog: ref.watch(categoryPrefectureFilteredAdsProvider),
+    catalog: ref.watch(activeDistributingAdsProvider),
   );
 });
 

@@ -19,6 +19,8 @@ const _kCarouselConfig = CarouselViewportConfig(
   itemHeight: 360,
 );
 
+const _kPaginationHeight = 18.0;
+
 class FeaturedAdsCarousel extends ConsumerStatefulWidget {
   const FeaturedAdsCarousel({
     super.key,
@@ -38,54 +40,45 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
   final _scrollController = ScrollController();
   var _focusedIndex = 0;
   var _isProgrammaticScroll = false;
-  var _initialScrollApplied = false;
-  var _initialScrollScheduled = false;
-  int? _lastItemCount;
+  int? _trackedItemCount;
+  var _itemCountSyncScheduled = false;
 
   CarouselLayoutEngine get _engine =>
       CarouselLayoutEngine(config: widget.viewportConfig);
 
-  void _scheduleInitialCenterFocus({
+  /// 件数変化時は1回だけ offset を同期する（build 内から呼ぶ）。
+  void _scheduleItemCountSync({
     required int itemCount,
     required CarouselLayoutMetrics layout,
   }) {
-    if (_initialScrollApplied || _initialScrollScheduled || itemCount <= 1) {
-      return;
-    }
-    _initialScrollScheduled = true;
+    if (_trackedItemCount == itemCount || _itemCountSyncScheduled) return;
+    _itemCountSyncScheduled = true;
+
+    final isFirstLoad = _trackedItemCount == null;
+    _trackedItemCount = itemCount;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || !_scrollController.hasClients || _initialScrollApplied) {
-        return;
-      }
+      _itemCountSyncScheduled = false;
+      if (!mounted || itemCount <= 0 || !_scrollController.hasClients) return;
 
-      final centerIndex = CarouselLayoutMetrics.initialFocusIndex(itemCount);
-      _lastItemCount = itemCount;
+      final targetIndex = isFirstLoad
+          ? CarouselLayoutMetrics.initialFocusIndex(itemCount)
+          : _focusedIndex.clamp(0, itemCount - 1);
+
       await _applyScrollOffset(
         offset: layout.scrollOffsetForFocusIndex(
-          centerIndex,
+          targetIndex,
           itemCount: itemCount,
         ),
-        targetIndex: centerIndex,
+        targetIndex: targetIndex,
         animate: false,
       );
-      if (!mounted) return;
-      _initialScrollApplied = true;
     });
   }
 
-  @override
-  void didUpdateWidget(covariant FeaturedAdsCarousel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final itemCount = ref.read(spotlightAdsProvider).length;
-    if (_lastItemCount != null && _lastItemCount != itemCount) {
-      _initialScrollApplied = false;
-      _initialScrollScheduled = false;
-      _focusedIndex = CarouselLayoutMetrics.initialFocusIndex(itemCount);
-    }
-  }
-
   Future<void> _afterProgrammaticScroll() async {
+    // jumpTo / animateTo 由来の ScrollEnd を無視するため2フレーム待つ。
+    await SchedulerBinding.instance.endOfFrame;
     await SchedulerBinding.instance.endOfFrame;
     if (!mounted) return;
     _isProgrammaticScroll = false;
@@ -96,6 +89,8 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
     required int targetIndex,
     required bool animate,
   }) async {
+    if (!_scrollController.hasClients) return;
+
     _isProgrammaticScroll = true;
     _focusedIndex = targetIndex;
     setState(() {});
@@ -180,7 +175,9 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
     required int itemCount,
     required CarouselLayoutMetrics layout,
   }) {
-    if (notification is ScrollEndNotification) {
+    if (_isProgrammaticScroll) return false;
+    if (notification is ScrollEndNotification &&
+        notification.depth == 0) {
       _handleScrollEnd(itemCount: itemCount, layout: layout);
     }
     return false;
@@ -195,8 +192,6 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
   @override
   Widget build(BuildContext context) {
     final ads = ref.watch(spotlightAdsProvider);
-    if (ads.isEmpty) return const SizedBox.shrink();
-
     final itemCount = ads.length;
     final engine = _engine;
 
@@ -213,10 +208,20 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
           LayoutBuilder(
             builder: (context, constraints) {
               final layout = engine.compute(constraints.maxWidth);
-              _scheduleInitialCenterFocus(
-                itemCount: itemCount,
-                layout: layout,
-              );
+
+              if (itemCount > 0) {
+                _scheduleItemCountSync(
+                  itemCount: itemCount,
+                  layout: layout,
+                );
+              }
+
+              if (itemCount == 0) {
+                _trackedItemCount = 0;
+                return _CarouselEmptyPlaceholder(
+                  height: engine.config.itemHeight,
+                );
+              }
 
               return Stack(
                 alignment: Alignment.center,
@@ -294,28 +299,62 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
               );
             },
           ),
-          if (itemCount > 1) ...[
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (var i = 0; i < itemCount; i++)
-                  AnimatedContainer(
-                    duration: AppMotion.fast,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: _focusedIndex == i ? 10 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: _focusedIndex == i
-                          ? AppColors.primary
-                          : Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(3),
+          SizedBox(
+            height: _kPaginationHeight + 12,
+            child: itemCount > 1
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (var i = 0; i < itemCount; i++)
+                          AnimatedContainer(
+                            duration: AppMotion.fast,
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 3),
+                            width: _focusedIndex == i ? 10 : 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: _focusedIndex == i
+                                  ? AppColors.primary
+                                  : Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-              ],
-            ),
-          ],
+                  )
+                : null,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _CarouselEmptyPlaceholder extends StatelessWidget {
+  const _CarouselEmptyPlaceholder({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Center(
+          child: Text(
+            '現在表示できる注目広告はありません',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                ),
+          ),
+        ),
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:carilune/models/ad.dart';
+import 'package:carilune/models/featured_placement.dart';
 import 'package:carilune/providers/ad_list_provider.dart';
+import 'package:carilune/services/featured_carousel_resolver.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -54,5 +56,58 @@ void main() {
   test('applySort sorts by popularity', () {
     final result = applySort(sampleAds, SortOrder.popular);
     expect(result.first.viewCount, 200);
+  });
+
+  test('spotlight resolve is independent of category filter', () {
+    final catalog = [
+      Ad(
+        id: 'spot-a',
+        companyName: 'A',
+        catchCopy: 'copy',
+        prText: 'pr',
+        thumbnailAssetPath: 'assets/images/placeholder_ad_01.png',
+        category: '飲食店',
+        startDate: DateTime(2026, 1, 1),
+        distributionDays: 10,
+        isDistributing: true,
+      ),
+      Ad(
+        id: 'spot-b',
+        companyName: 'B',
+        catchCopy: 'copy',
+        prText: 'pr',
+        thumbnailAssetPath: 'assets/images/placeholder_ad_01.png',
+        category: '生活雑貨',
+        startDate: DateTime(2026, 1, 1),
+        distributionDays: 10,
+        isDistributing: true,
+      ),
+    ];
+    final placements = [
+      const FeaturedPlacement(
+        id: '1',
+        placementKey: FeaturedPlacementKeys.memberHomeSpotlight,
+        adId: 'spot-a',
+        sortOrder: 0,
+      ),
+      const FeaturedPlacement(
+        id: '2',
+        placementKey: FeaturedPlacementKeys.memberHomeSpotlight,
+        adId: 'spot-b',
+        sortOrder: 1,
+      ),
+    ];
+
+    final allCategory = FeaturedCarouselResolver.resolve(
+      placements: placements,
+      catalog: catalog,
+    );
+    final foodOnly = FeaturedCarouselResolver.resolve(
+      placements: placements,
+      catalog: applyCategoryPrefectureFilter(catalog, '飲食店', 'すべて'),
+    );
+
+    expect(allCategory, hasLength(2));
+    expect(foodOnly, hasLength(1));
   });
 }
