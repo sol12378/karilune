@@ -128,7 +128,7 @@ class _ModeToggle extends StatelessWidget {
             context.go(next.homeRoute);
           }
         },
-        style: ButtonStyle(
+        style: const ButtonStyle(
           visualDensity: VisualDensity.compact,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),

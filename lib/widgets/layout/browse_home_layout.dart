@@ -60,9 +60,9 @@ class BrowseHomeLayout extends ConsumerWidget {
             if (showCategorySidebar && !useSidebar) ...[
               const SliverToBoxAdapter(child: CategorySidebarCompact()),
               if (showPrefectureFilter)
-                SliverToBoxAdapter(
+                const SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+                    padding: EdgeInsets.fromLTRB(12, 4, 12, 8),
                     child: CompactPrefectureFilter(),
                   ),
                 ),
