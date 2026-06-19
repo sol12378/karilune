@@ -56,6 +56,13 @@ class AdminDashboardPage extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               _NavCard(
+                icon: Icons.star_outline,
+                title: '注目広告の掲載管理',
+                description: '会員・配信ホームカルーセルの追加・順序・有効/無効',
+                onTap: () => context.go('/admin/featured-placements'),
+              ),
+              const SizedBox(height: 12),
+              _NavCard(
                 icon: Icons.post_add_outlined,
                 title: '広告投稿を管理',
                 description: '自社広告の投稿・編集・効果確認',

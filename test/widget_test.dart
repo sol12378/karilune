@@ -9,10 +9,13 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() async {
-    SharedPreferences.setMockInitialValues({});
+    SharedPreferences.setMockInitialValues({
+      'auth_logged_in': true,
+      'auth_role': 'member',
+    });
   });
 
-  testWidgets('アプリが会員ホームで起動する', (WidgetTester tester) async {
+  testWidgets('ログイン済み会員がホームを表示する', (WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1280, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -25,15 +28,9 @@ void main() {
         child: const CariluneApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pumpAndSettle(const Duration(seconds: 2));
 
-    expect(find.text('カリルネ'), findsOneWidget);
     expect(find.text('注目の広告'), findsOneWidget);
-    expect(find.text('オプション設定の広告をピックアップ'), findsOneWidget);
     expect(find.text('配信中の広告'), findsOneWidget);
-
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -800));
-    await tester.pumpAndSettle();
-    expect(find.text('広告管理（デモ用）'), findsOneWidget);
   });
 }

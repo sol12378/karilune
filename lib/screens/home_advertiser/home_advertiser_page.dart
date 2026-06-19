@@ -5,9 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../models/ad.dart';
 import '../../providers/ad_list_provider.dart';
 import '../../providers/operator_stats_provider.dart';
+import '../../theme/breakpoints.dart';
 import '../../widgets/ad_card_advertiser.dart';
 import '../../widgets/ad_grid.dart';
+import '../../widgets/ad_grid_skeleton.dart';
 import '../../widgets/app_shell.dart';
+import '../../widgets/common/section_header.dart';
+import '../../widgets/demo_async_wrapper.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/operator/operator_home_layout.dart';
 import '../../widgets/operator/operator_mode.dart';
@@ -30,7 +34,13 @@ class HomeAdvertiserPage extends ConsumerWidget {
             showRecommended: false,
             showCategorySidebar: false,
             statsProvider: advertiserPerformanceProvider,
-            buildMain: (width) => AdvertiserAdsGrid(width: width),
+            buildMain: (width) => DemoAsyncWrapper(
+              cacheKey: 'advertiser-home-grid',
+              loading: AdGridSkeleton(
+                crossAxisCount: width >= Breakpoints.desktop ? 3 : 2,
+              ),
+              builder: () => AdvertiserAdsGrid(width: width),
+            ),
           ),
           Positioned(
             right: 16,
@@ -54,23 +64,54 @@ class AdvertiserAdsGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ads = ref.watch(activeAdvertiserAdsProvider);
+    final split = ref.watch(advertiserAdsSplitProvider);
+    final hasAny = split.drafts.isNotEmpty ||
+        split.pending.isNotEmpty ||
+        split.active.isNotEmpty;
 
-    if (ads.isEmpty) {
+    if (!hasAny) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 48),
         child: EmptyState(
           icon: Icons.campaign_outlined,
-          title: '配信中・予定の広告はありません',
+          title: '広告はまだありません',
           description: '右下のボタンから新規広告を作成できます。',
         ),
       );
     }
 
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (split.drafts.isNotEmpty) ...[
+            const SectionHeader(title: '下書き'),
+            _sectionGrid(context, split.drafts),
+            const SizedBox(height: 16),
+          ],
+          if (split.pending.isNotEmpty) ...[
+            const SectionHeader(title: '審査中'),
+            _sectionGrid(context, split.pending),
+            const SizedBox(height: 16),
+          ],
+          if (split.active.isNotEmpty) ...[
+            const SectionHeader(
+              title: '配信中・予定',
+              subtitle: '公開済みの広告',
+            ),
+            _sectionGrid(context, split.active),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionGrid(BuildContext context, List<Ad> ads) {
     return AdGridView.builder(
       width: width,
       shrinkWrap: true,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+      padding: const EdgeInsets.only(bottom: 8),
       itemCount: ads.length,
       itemBuilder: (context, index) {
         final ad = ads[index];

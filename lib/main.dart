@@ -21,16 +21,17 @@ Future<void> main() async {
   );
 }
 
-class CariluneApp extends StatelessWidget {
+class CariluneApp extends ConsumerWidget {
   const CariluneApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
     return MaterialApp.router(
       title: 'カリルネ',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

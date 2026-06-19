@@ -102,7 +102,16 @@ class AdCardAdvertiser extends StatelessWidget {
   Widget _statusBadge(Ad ad) {
     late final String label;
     late final Color color;
-    if (ad.isEnded) {
+    if (ad.isDraft) {
+      label = '下書き';
+      color = Colors.grey;
+    } else if (ad.isPendingReview) {
+      label = '審査中';
+      color = Colors.orange;
+    } else if (ad.isRejected) {
+      label = '却下';
+      color = AppColors.ended;
+    } else if (ad.isEnded) {
       label = '終了';
       color = AppColors.ended;
     } else if (ad.isScheduled) {

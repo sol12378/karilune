@@ -6,7 +6,9 @@ import '../../providers/ad_list_provider.dart';
 import '../../theme/breakpoints.dart';
 import '../../widgets/ad_card_consumer.dart';
 import '../../widgets/ad_grid.dart';
+import '../../widgets/ad_grid_skeleton.dart';
 import '../../widgets/app_shell.dart';
+import '../../widgets/demo_async_wrapper.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/member/member_home_layout.dart';
 import '../../widgets/member_filter_bar.dart';
@@ -33,10 +35,15 @@ class HomeMemberPage extends ConsumerWidget {
           return Stack(
             children: [
               MemberHomeLayout(
-                showDemoAdminLink: !showFilterBar,
-                buildMain: (width) => MemberAdsGrid(
-                  width: width,
-                  bottomPadding: showFilterBar ? 80 : 24,
+                buildMain: (width) => DemoAsyncWrapper(
+                  cacheKey: 'member-home-grid',
+                  loading: AdGridSkeleton(
+                    crossAxisCount: width >= Breakpoints.desktop ? 3 : 2,
+                  ),
+                  builder: () => MemberAdsGrid(
+                    width: width,
+                    bottomPadding: showFilterBar ? 80 : 24,
+                  ),
                 ),
               ),
               if (showFilterBar)
@@ -54,7 +61,6 @@ class HomeMemberPage extends ConsumerWidget {
   }
 }
 
-/// グリッドのみ [memberAdsProvider] を watch し、フィルタ・Spotlight の rebuild を分離する。
 class MemberAdsGrid extends ConsumerWidget {
   const MemberAdsGrid({
     super.key,
@@ -75,6 +81,7 @@ class MemberAdsGrid extends ConsumerWidget {
         child: EmptyState(
           icon: Icons.campaign_outlined,
           title: '現在配信中の広告はありません',
+          description: 'カテゴリや地域の条件を変更してみてください。',
         ),
       );
     }

@@ -34,12 +34,21 @@ void main() {
       expect(repository.findById('test-ad'), isNotNull);
     });
 
-    test('toggleDistributing flips flag', () {
+    test('toggleDistributing flips flag and increments distributorCount', () {
       final ad = repository.findById('ad-002')!;
+      final beforeCount = ad.distributorCount;
       expect(ad.isDistributing, isFalse);
       repository.toggleDistributing('ad-002');
-      expect(repository.findById('ad-002')!.isDistributing, isTrue);
-      expect(repository.findById('ad-002')!.wasDistributed, isTrue);
+      final updated = repository.findById('ad-002')!;
+      expect(updated.isDistributing, isTrue);
+      expect(updated.wasDistributed, isTrue);
+      expect(updated.distributorCount, beforeCount + 1);
+    });
+
+    test('incrementViewCount increases viewCount', () {
+      final before = repository.findById('ad-001')!.viewCount;
+      repository.incrementViewCount('ad-001');
+      expect(repository.findById('ad-001')!.viewCount, before + 1);
     });
   });
 }

@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../models/account.dart';
+import '../../models/notification.dart';
 import '../../providers/account_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../widgets/admin_shell.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/operator/operator_mode.dart';
@@ -19,7 +21,7 @@ class AccountPage extends ConsumerStatefulWidget {
     this.useAdminShell = false,
     this.useOperatorShell = false,
     this.shellTitle = 'アカウント',
-    this.showDemoAdminLink = false,
+    this.showAdminLink = false,
   });
 
   final StateNotifierProvider<AccountNotifier, Account> accountProvider;
@@ -29,7 +31,7 @@ class AccountPage extends ConsumerStatefulWidget {
   final bool useAdminShell;
   final bool useOperatorShell;
   final String shellTitle;
-  final bool showDemoAdminLink;
+  final bool showAdminLink;
 
   @override
   ConsumerState<AccountPage> createState() => _AccountPageState();
@@ -155,18 +157,56 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                       child: const Text('保存する'),
                     ),
                   ),
-                  if (widget.showDemoAdminLink) ...[
+                  if (widget.showAdminLink) ...[
                     const SizedBox(height: 24),
                     const Divider(),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.admin_panel_settings_outlined),
                       title: const Text('広告管理ダッシュボード'),
-                      subtitle: const Text('配信・投稿の管理（デモ用）'),
+                      subtitle: const Text('注目広告の掲載管理・全体統計'),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => context.go('/admin/dashboard'),
                     ),
                   ],
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  Text(
+                    'デモ用ロール切替',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  for (final role in AppRole.values)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(_roleIcon(role)),
+                      title: Text(_roleLabel(role)),
+                      trailing: ref.watch(authProvider).role == role
+                          ? Icon(
+                              Icons.check_circle,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        await ref.read(authProvider.notifier).switchRole(role);
+                        if (context.mounted) {
+                          context.go(ref.read(authProvider).homeRoute);
+                        }
+                      },
+                    ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      await ref.read(authProvider.notifier).logout();
+                      if (context.mounted) {
+                        context.go('/login');
+                      }
+                    },
+                    icon: const Icon(Icons.logout),
+                    label: const Text('ログアウト'),
+                  ),
                 ],
               ),
             ),
@@ -208,5 +248,27 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       onNavTap: widget.onNavTap,
       child: body,
     );
+  }
+
+  IconData _roleIcon(AppRole role) {
+    switch (role) {
+      case AppRole.member:
+        return Icons.person_outline;
+      case AppRole.distributor:
+        return Icons.broadcast_on_personal_outlined;
+      case AppRole.advertiser:
+        return Icons.post_add_outlined;
+    }
+  }
+
+  String _roleLabel(AppRole role) {
+    switch (role) {
+      case AppRole.member:
+        return '会員として見る';
+      case AppRole.distributor:
+        return '配信者として操作';
+      case AppRole.advertiser:
+        return '投稿者として操作';
+    }
   }
 }

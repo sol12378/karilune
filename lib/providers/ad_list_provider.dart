@@ -10,6 +10,13 @@ enum SortOrder {
   newest,
   endingSoon,
   popular,
+  recommended,
+}
+
+enum DistributorDistributionFilter {
+  all,
+  distributing,
+  notDistributing,
 }
 
 /// 全広告リスト（Repository のエイリアス）
@@ -31,31 +38,53 @@ final adByIdProvider = Provider.family<Ad?, String>((ref, adId) {
 class AdvertiserAdsSplit {
   const AdvertiserAdsSplit({
     required this.all,
+    required this.drafts,
+    required this.pending,
     required this.active,
     required this.ended,
+    required this.rejected,
   });
 
   final List<Ad> all;
+  final List<Ad> drafts;
+  final List<Ad> pending;
   final List<Ad> active;
   final List<Ad> ended;
+  final List<Ad> rejected;
 }
 
-/// 投稿者向け広告を1回の走査で active / ended に分割
+/// 投稿者向け広告を1回の走査で分割
 final advertiserAdsSplitProvider = Provider<AdvertiserAdsSplit>((ref) {
   final all = ref
       .watch(adRepositoryProvider)
       .where((ad) => ad.isAdvertiserAd || ad.isOwnAd)
       .toList();
+  final drafts = <Ad>[];
+  final pending = <Ad>[];
   final active = <Ad>[];
   final ended = <Ad>[];
+  final rejected = <Ad>[];
   for (final ad in all) {
-    if (ad.isEnded) {
+    if (ad.isDraft) {
+      drafts.add(ad);
+    } else if (ad.isPendingReview) {
+      pending.add(ad);
+    } else if (ad.isRejected) {
+      rejected.add(ad);
+    } else if (ad.isEnded) {
       ended.add(ad);
     } else {
       active.add(ad);
     }
   }
-  return AdvertiserAdsSplit(all: all, active: active, ended: ended);
+  return AdvertiserAdsSplit(
+    all: all,
+    drafts: drafts,
+    pending: pending,
+    active: active,
+    ended: ended,
+    rejected: rejected,
+  );
 });
 
 /// 投稿者向け広告（自社・管理対象）
@@ -69,6 +98,14 @@ final selectedPrefectureProvider = StateProvider<String>((ref) => 'すべて');
 
 final sortOrderProvider =
     StateProvider<SortOrder>((ref) => SortOrder.newest);
+
+final distributorSortOrderProvider =
+    StateProvider<SortOrder>((ref) => SortOrder.newest);
+
+final distributorDistributionFilterProvider =
+    StateProvider<DistributorDistributionFilter>(
+  (ref) => DistributorDistributionFilter.all,
+);
 
 List<Ad> applyCategoryPrefectureFilter(
   List<Ad> ads,
@@ -92,8 +129,35 @@ List<Ad> applySort(List<Ad> ads, SortOrder order) {
       sorted.sort((a, b) => a.endDate.compareTo(b.endDate));
     case SortOrder.popular:
       sorted.sort((a, b) => b.viewCount.compareTo(a.viewCount));
+    case SortOrder.recommended:
+      sorted.sort((a, b) {
+        if (a.hasSpotlightOption != b.hasSpotlightOption) {
+          return a.hasSpotlightOption ? -1 : 1;
+        }
+        return b.startDate.compareTo(a.startDate);
+      });
   }
   return sorted;
+}
+
+List<Ad> applyDistributorDistributionFilter(
+  List<Ad> ads,
+  DistributorDistributionFilter filter,
+) {
+  switch (filter) {
+    case DistributorDistributionFilter.all:
+      return ads;
+    case DistributorDistributionFilter.distributing:
+      return ads.where((ad) => ad.isDistributing).toList();
+    case DistributorDistributionFilter.notDistributing:
+      return ads.where((ad) => !ad.isDistributing).toList();
+  }
+}
+
+List<Ad> publishedCatalogAds(List<Ad> ads) {
+  return ads
+      .where((ad) => ad.isVisibleToCatalog && !ad.isEnded)
+      .toList();
 }
 
 /// カテゴリ・地域フィルタのみ適用（会員・配信者で共有）
@@ -101,7 +165,11 @@ final categoryPrefectureFilteredAdsProvider = Provider<List<Ad>>((ref) {
   final ads = ref.watch(adListProvider);
   final category = ref.watch(selectedCategoryProvider);
   final prefecture = ref.watch(selectedPrefectureProvider);
-  return applyCategoryPrefectureFilter(ads, category, prefecture);
+  return applyCategoryPrefectureFilter(
+    publishedCatalogAds(ads),
+    category,
+    prefecture,
+  );
 });
 
 final filteredAdsProvider = categoryPrefectureFilteredAdsProvider;
@@ -117,12 +185,52 @@ final memberAdsProvider = Provider<List<Ad>>((ref) {
   return applySort(active, sortOrder);
 });
 
+class DistributorAdsSplit {
+  const DistributorAdsSplit({
+    required this.ownDistributing,
+    required this.candidates,
+    required this.all,
+  });
+
+  final List<Ad> ownDistributing;
+  final List<Ad> candidates;
+  final List<Ad> all;
+}
+
+final distributorAdsSplitProvider = Provider<DistributorAdsSplit>((ref) {
+  final filtered = ref.watch(categoryPrefectureFilteredAdsProvider);
+  final sortOrder = ref.watch(distributorSortOrderProvider);
+  final distributionFilter = ref.watch(distributorDistributionFilterProvider);
+
+  final filteredByDistribution =
+      applyDistributorDistributionFilter(filtered, distributionFilter);
+  final sorted = applySort(filteredByDistribution, sortOrder);
+
+  final ownDistributing = sorted
+      .where((ad) => ad.isOwnAd && ad.isDistributing && ad.isActive)
+      .toList();
+  final candidates = sorted
+      .where((ad) => !(ad.isOwnAd && ad.isDistributing && ad.isActive))
+      .toList();
+
+  return DistributorAdsSplit(
+    ownDistributing: ownDistributing,
+    candidates: candidates,
+    all: sorted,
+  );
+});
+
+final distributorAdsProvider = Provider<List<Ad>>((ref) {
+  return ref.watch(distributorAdsSplitProvider).all;
+});
+
 /// 配信中かつ有効な広告（カテゴリ・地域フィルタなし）。
 /// 注目カルーセル等、フィルタ独立の掲載枠向け。
 final activeDistributingAdsProvider = Provider<List<Ad>>((ref) {
   return ref
       .watch(adListProvider)
-      .where((ad) => ad.isDistributing && ad.isActive)
+      .where((ad) =>
+          ad.isVisibleToCatalog && ad.isDistributing && ad.isActive)
       .toList();
 });
 
@@ -156,6 +264,14 @@ final endedAdvertiserAdsProvider = Provider<List<Ad>>((ref) {
 
 final activeAdvertiserAdsProvider = Provider<List<Ad>>((ref) {
   return ref.watch(advertiserAdsSplitProvider).active;
+});
+
+final draftAdvertiserAdsProvider = Provider<List<Ad>>((ref) {
+  return ref.watch(advertiserAdsSplitProvider).drafts;
+});
+
+final pendingAdvertiserAdsProvider = Provider<List<Ad>>((ref) {
+  return ref.watch(advertiserAdsSplitProvider).pending;
 });
 
 final distributorHistoryAdsProvider = Provider<List<Ad>>((ref) {

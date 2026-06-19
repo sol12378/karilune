@@ -8,8 +8,10 @@ List<AppNotification> notificationsForRole(String role) {
         AppNotification(
           id: 'n-m-1',
           title: '新着広告のお知らせ',
-          body: 'お住まいの地域に新しい飲食店の広告が配信されました。',
+          body: 'お住まいの地域に新しい生活雑貨店の広告が配信されました。',
           createdAt: now.subtract(const Duration(hours: 2)),
+          adId: 'ad-002',
+          targetRoute: '/ads/ad-002?from=member',
         ),
         AppNotification(
           id: 'n-m-2',
@@ -17,6 +19,8 @@ List<AppNotification> notificationsForRole(String role) {
           body: '「名古屋焼肉 炎」の配信があと3日で終了します。',
           createdAt: now.subtract(const Duration(days: 1)),
           isRead: true,
+          adId: 'ad-001',
+          targetRoute: '/ads/ad-001?from=member',
         ),
         AppNotification(
           id: 'n-m-3',
@@ -24,6 +28,8 @@ List<AppNotification> notificationsForRole(String role) {
           body: '春のガス機器点検キャンペーン実施中です。',
           createdAt: now.subtract(const Duration(days: 3)),
           isRead: true,
+          adId: 'own-ad-001',
+          targetRoute: '/ads/own-ad-001?from=member',
         ),
       ];
     case 'distributor':
@@ -33,12 +39,16 @@ List<AppNotification> notificationsForRole(String role) {
           title: '配信依頼が届きました',
           body: '「すぐ駆けつけ修理 24」から配信依頼通知が届いています。',
           createdAt: now.subtract(const Duration(hours: 1)),
+          adId: 'ad-003',
+          targetRoute: '/ads/ad-003?from=distributor',
         ),
         AppNotification(
           id: 'n-d-2',
           title: '新規広告が追加されました',
-          body: 'カテゴリ「飲食店」に新しい広告が3件追加されました。',
+          body: 'カテゴリ「飲食店」に新しい広告が追加されました。',
           createdAt: now.subtract(const Duration(hours: 5)),
+          adId: 'ad-001',
+          targetRoute: '/ads/ad-001?from=distributor',
         ),
         AppNotification(
           id: 'n-d-3',
@@ -46,21 +56,26 @@ List<AppNotification> notificationsForRole(String role) {
           body: '先週の配信広告の参照数が更新されました。',
           createdAt: now.subtract(const Duration(days: 2)),
           isRead: true,
+          targetRoute: '/distributor/home',
         ),
       ];
-    default:
+    case 'advertiser':
       return [
         AppNotification(
           id: 'n-a-1',
           title: '広告が配信開始されました',
           body: '「自社広告：春の安全点検」が5事業者で配信開始されました。',
           createdAt: now.subtract(const Duration(hours: 3)),
+          adId: 'own-ad-001',
+          targetRoute: '/ads/own-ad-001?from=advertiser',
         ),
         AppNotification(
           id: 'n-a-2',
           title: '審査完了のお知らせ',
           body: '投稿いただいた広告の審査が完了しました。',
           createdAt: now.subtract(const Duration(days: 1)),
+          adId: 'ad-story-pending',
+          targetRoute: '/advertiser/home',
         ),
         AppNotification(
           id: 'n-a-3',
@@ -70,5 +85,7 @@ List<AppNotification> notificationsForRole(String role) {
           isRead: true,
         ),
       ];
+    default:
+      return [];
   }
 }
