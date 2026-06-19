@@ -1,6 +1,7 @@
 import 'package:carilune/models/ad.dart';
 import 'package:carilune/providers/account_provider.dart';
 import 'package:carilune/widgets/ad_card_consumer.dart';
+import 'package:carilune/widgets/ad_card_distributor.dart';
 import 'package:carilune/widgets/ad_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,6 +63,31 @@ void main() {
     );
     await tester.pumpWidget(app);
     await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AdCardDistributor shows recommended badge for spotlight ads', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 420));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final spotlightAd = testAd.copyWith(
+      hasSpotlightOption: true,
+      isDistributing: true,
+    );
+    final app = await scopedApp(
+      SizedBox(
+        width: 280,
+        height: 380,
+        child: AdCardDistributor(ad: spotlightAd),
+      ),
+    );
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+
+    expect(find.text('お勧め'), findsOneWidget);
+    expect(find.text('配信中'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

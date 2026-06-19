@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../models/ad.dart';
 import '../theme/app_theme.dart';
+import '../utils/date_formats.dart';
 import 'ad_card_grid_shell.dart';
 
 class AdCardDistributor extends StatelessWidget {
@@ -19,13 +19,17 @@ class AdCardDistributor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('MM/dd');
-
     return AdCardGridShell(
       assetPath: ad.thumbnailAssetPath,
       networkUrl: ad.thumbnailUrl,
       onTap: onTap,
       thumbnailOverlays: [
+        if (ad.hasSpotlightOption)
+          const Positioned(
+            top: 6,
+            left: 6,
+            child: AdCardBadge(label: 'お勧め', color: AppColors.accent),
+          ),
         if (ad.isDistributing)
           const Positioned(
             top: 6,
@@ -44,10 +48,11 @@ class AdCardDistributor extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             AdCardSummaryRow(
-              labels: const ['開始', '終了', '参照'],
+              labels: const ['開始', '終了', '配信数', '参照数'],
               values: [
-                dateFormat.format(ad.startDate),
-                dateFormat.format(ad.endDate),
+                AppDateFormats.monthDay.format(ad.startDate),
+                AppDateFormats.monthDay.format(ad.endDate),
+                '${ad.distributorCount}',
                 '${ad.viewCount}',
               ],
             ),

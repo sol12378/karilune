@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
-import '../../models/ad.dart';
 import '../../data/ad_repository.dart';
+import '../../models/ad.dart';
+import '../../providers/ad_list_provider.dart';
 import '../../providers/favorites_provider.dart';
 import '../../theme/app_theme.dart';
+import '../../utils/date_formats.dart';
 import '../../utils/pricing_calculator.dart';
 import '../../widgets/ad_thumbnail.dart';
 
@@ -16,21 +17,16 @@ class AdDetailPage extends ConsumerWidget {
   final String adId;
   final String? fromMode;
 
-  Ad? _findAd(WidgetRef ref) {
-    return ref.read(adRepositoryProvider.notifier).findById(adId);
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(adRepositoryProvider);
-    final ad = _findAd(ref);
+    final ad = ref.watch(adByIdProvider(adId));
     final mode = fromMode ??
         GoRouterState.of(context).uri.queryParameters['from'] ??
         'member';
     final isMemberMode = mode == 'member';
     final showDistributeButton = mode == 'distributor';
     final isAdvertiserMode = mode == 'advertiser';
-    final isFavorite = ref.watch(favoritesProvider).contains(adId);
+    final isFavorite = ref.watch(isFavoriteProvider(adId));
 
     if (ad == null) {
       return Scaffold(
@@ -39,7 +35,6 @@ class AdDetailPage extends ConsumerWidget {
       );
     }
 
-    final dateFormat = DateFormat('yyyy/MM/dd');
     final total = PricingCalculator.calculateTotal(
       distributionDays: ad.distributionDays,
       hasSpotlightOption: ad.hasSpotlightOption,
@@ -98,8 +93,8 @@ class AdDetailPage extends ConsumerWidget {
                 _InfoCard(
                   title: '配信情報',
                   children: [
-                    _infoRow('配信開始日', dateFormat.format(ad.startDate)),
-                    _infoRow('配信終了日', dateFormat.format(ad.endDate)),
+                    _infoRow('配信開始日', AppDateFormats.yearMonthDay.format(ad.startDate)),
+                    _infoRow('配信終了日', AppDateFormats.yearMonthDay.format(ad.endDate)),
                     _infoRow('配信日数', '${ad.distributionDays}日'),
                     _infoRow('カテゴリー', ad.category),
                     if (!isMemberMode)

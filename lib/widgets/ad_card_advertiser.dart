@@ -1,32 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../models/ad.dart';
 import '../theme/app_theme.dart';
+import '../utils/date_formats.dart';
 import 'ad_card_grid_shell.dart';
+
+enum AdCardAdvertiserVariant { active, history }
 
 class AdCardAdvertiser extends StatelessWidget {
   const AdCardAdvertiser({
     super.key,
     required this.ad,
+    this.variant = AdCardAdvertiserVariant.active,
     this.onTap,
     this.onDetail,
     this.onEdit,
   });
 
   final Ad ad;
+  final AdCardAdvertiserVariant variant;
   final VoidCallback? onTap;
   final VoidCallback? onDetail;
   final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('MM/dd');
+    final isHistory = variant == AdCardAdvertiserVariant.history;
 
     return AdCardGridShell(
       assetPath: ad.thumbnailAssetPath,
       networkUrl: ad.thumbnailUrl,
-      onTap: onTap,
+      onTap: onTap ?? onDetail,
       thumbnailOverlays: [
         Positioned(
           top: 6,
@@ -51,19 +55,24 @@ class AdCardAdvertiser extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             AdCardSummaryRow(
-              labels: const ['開始', '終了', '配信'],
+              labels: isHistory
+                  ? const ['開始', '終了', '配信日数', '参照数']
+                  : const ['開始', '終了', '配信者数', '参照数'],
               values: [
-                dateFormat.format(ad.startDate),
-                dateFormat.format(ad.endDate),
-                '${ad.distributorCount}',
+                AppDateFormats.monthDay.format(ad.startDate),
+                AppDateFormats.monthDay.format(ad.endDate),
+                isHistory
+                    ? '${ad.distributionDays}日'
+                    : '${ad.distributorCount}',
+                '${ad.viewCount}',
               ],
             ),
           ],
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextButton(
+        if (isHistory)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
               onPressed: onDetail,
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -72,7 +81,11 @@ class AdCardAdvertiser extends StatelessWidget {
               ),
               child: const Text('詳細', style: TextStyle(fontSize: 12)),
             ),
-            TextButton(
+          )
+        else
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
               onPressed: onEdit,
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -81,8 +94,7 @@ class AdCardAdvertiser extends StatelessWidget {
               ),
               child: const Text('編集', style: TextStyle(fontSize: 12)),
             ),
-          ],
-        ),
+          ),
       ],
     );
   }

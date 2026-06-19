@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
 import '../theme/breakpoints.dart';
 
+/// 会員向け AppShell。モード切替なし（[ScreenRoleConfig] 参照）。
 class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
@@ -54,6 +55,10 @@ class AppShell extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Divider(height: 1, color: Colors.grey.shade200),
+            ),
           ),
           body: Row(
             children: [

@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../mock_data/club_members_mock.dart';
-import '../../widgets/admin_shell.dart';
 import '../../widgets/app_shell.dart';
+import '../../widgets/operator/operator_mode.dart';
+import '../../widgets/operator/operator_shell.dart';
 
 class ClubTeamPage extends StatelessWidget {
   const ClubTeamPage({super.key});
@@ -12,15 +13,12 @@ class ClubTeamPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    final selectedNav = navIndexForLocation(distributorNavItems, location);
     final dateFormat = DateFormat('yyyy/MM/dd');
 
-    return AdminShell(
+    return OperatorShell(
       currentLocation: location,
+      mode: OperatorMode.distributor,
       navItems: distributorNavItems,
-      selectedNavIndex: selectedNav,
-      onNavTap: (index) => context.go(distributorNavItems[index].location),
-      title: 'クラブチーム',
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [

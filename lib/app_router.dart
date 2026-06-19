@@ -50,6 +50,7 @@ final appRouter = GoRouter(
         selectedNavIndex:
             navIndexForLocation(memberNavItems, state.matchedLocation),
         onNavTap: (index) => context.go(memberNavItems[index].location),
+        showDemoAdminLink: true,
       ),
     ),
     GoRoute(
@@ -77,7 +78,7 @@ final appRouter = GoRouter(
       builder: (context, state) => NotificationsPage(
         role: 'distributor',
         homeRoute: '/distributor/home',
-        useAdminShell: true,
+        useOperatorShell: true,
         shellTitle: '通知',
         navItems: distributorNavItems,
         selectedNavIndex:
@@ -89,7 +90,7 @@ final appRouter = GoRouter(
       path: '/distributor/account',
       builder: (context, state) => AccountPage(
         accountProvider: distributorAccountProvider,
-        useAdminShell: true,
+        useOperatorShell: true,
         shellTitle: 'アカウント',
         navItems: distributorNavItems,
         selectedNavIndex:
@@ -110,7 +111,7 @@ final appRouter = GoRouter(
       builder: (context, state) => NotificationsPage(
         role: 'advertiser',
         homeRoute: '/advertiser/home',
-        useAdminShell: true,
+        useOperatorShell: true,
         shellTitle: '通知',
         navItems: advertiserNavItems,
         selectedNavIndex:
@@ -122,7 +123,7 @@ final appRouter = GoRouter(
       path: '/advertiser/account',
       builder: (context, state) => AccountPage(
         accountProvider: advertiserAccountProvider,
-        useAdminShell: true,
+        useOperatorShell: true,
         shellTitle: 'アカウント',
         navItems: advertiserNavItems,
         selectedNavIndex:
