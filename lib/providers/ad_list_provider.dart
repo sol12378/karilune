@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/ad_repository.dart';
+import '../data/featured_placement_repository.dart';
 import '../models/ad.dart';
+import '../models/featured_placement.dart';
+import '../services/featured_carousel_resolver.dart';
 
 enum SortOrder {
   newest,
@@ -115,17 +118,27 @@ final memberAdsProvider = Provider<List<Ad>>((ref) {
 });
 
 final spotlightAdsProvider = Provider<List<Ad>>((ref) {
-  return ref
-      .watch(memberAdsProvider)
-      .where((ad) => ad.hasSpotlightOption)
+  final placements = ref
+      .watch(featuredPlacementRepositoryProvider)
+      .where((p) => p.placementKey == FeaturedPlacementKeys.memberHomeSpotlight)
       .toList();
+  return FeaturedCarouselResolver.resolve(
+    placements: placements,
+    catalog: ref.watch(memberAdsProvider),
+  );
 });
 
 final distributorSpotlightAdsProvider = Provider<List<Ad>>((ref) {
-  return ref
-      .watch(categoryPrefectureFilteredAdsProvider)
-      .where((ad) => ad.hasSpotlightOption)
+  final placements = ref
+      .watch(featuredPlacementRepositoryProvider)
+      .where(
+        (p) => p.placementKey == FeaturedPlacementKeys.distributorHomeSpotlight,
+      )
       .toList();
+  return FeaturedCarouselResolver.resolve(
+    placements: placements,
+    catalog: ref.watch(categoryPrefectureFilteredAdsProvider),
+  );
 });
 
 final endedAdvertiserAdsProvider = Provider<List<Ad>>((ref) {

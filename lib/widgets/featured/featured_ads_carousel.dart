@@ -1,39 +1,33 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/carousel_viewport_config.dart';
 import '../../providers/ad_list_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/motion.dart';
+import 'carousel_layout_engine.dart';
 import 'featured_ad_card.dart';
 
-const double _kItemSpacing = 20;
-const double _kCarouselHeight = 360;
-
-/// カルーセルのレイアウト計測値（スクロール位置計算に使用）。
-class _CarouselLayout {
-  const _CarouselLayout({
-    required this.viewportWidth,
-    required this.cardWidth,
-    required this.itemStride,
-    required this.leadingPadding,
-  });
-
-  final double viewportWidth;
-  final double cardWidth;
-  final double itemStride;
-  final double leadingPadding;
-}
+/// 会員ホーム等の注目広告カルーセル設定（中央1枚 + 左右袖）。
+const _kCarouselConfig = CarouselViewportConfig(
+  visibleColumnCount: 3,
+  horizontalInset: 48,
+  minItemWidth: 260,
+  maxItemWidth: kFeaturedAdCardWidth,
+  itemHeight: 360,
+);
 
 class FeaturedAdsCarousel extends ConsumerStatefulWidget {
   const FeaturedAdsCarousel({
     super.key,
     this.linkFrom = 'member',
+    this.viewportConfig = _kCarouselConfig,
   });
 
   final String linkFrom;
+  final CarouselViewportConfig viewportConfig;
 
   @override
   ConsumerState<FeaturedAdsCarousel> createState() =>
@@ -44,63 +38,80 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
   final _scrollController = ScrollController();
   var _focusedIndex = 0;
   var _isProgrammaticScroll = false;
+  var _initialScrollApplied = false;
+  var _initialScrollScheduled = false;
+  int? _lastItemCount;
 
-  double _cardWidth(double viewportWidth) {
-    final available = viewportWidth - 48;
-    final forThree = (available - 2 * _kItemSpacing) / 3;
-    return forThree.clamp(260.0, kFeaturedAdCardWidth);
+  CarouselLayoutEngine get _engine =>
+      CarouselLayoutEngine(config: widget.viewportConfig);
+
+  void _scheduleInitialCenterFocus({
+    required int itemCount,
+    required CarouselLayoutMetrics layout,
+  }) {
+    if (_initialScrollApplied || _initialScrollScheduled || itemCount <= 1) {
+      return;
+    }
+    _initialScrollScheduled = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !_scrollController.hasClients || _initialScrollApplied) {
+        return;
+      }
+
+      final centerIndex = CarouselLayoutMetrics.initialFocusIndex(itemCount);
+      _lastItemCount = itemCount;
+      await _applyScrollOffset(
+        offset: layout.scrollOffsetForFocusIndex(
+          centerIndex,
+          itemCount: itemCount,
+        ),
+        targetIndex: centerIndex,
+        animate: false,
+      );
+      if (!mounted) return;
+      _initialScrollApplied = true;
+    });
   }
 
-  double _itemStride(double cardWidth) => cardWidth + _kItemSpacing;
-
-  double _leadingPadding(double viewportWidth, double cardWidth) {
-    final trioWidth = 3 * cardWidth + 2 * _kItemSpacing;
-    return math.max(0, (viewportWidth - trioWidth) / 2);
+  @override
+  void didUpdateWidget(covariant FeaturedAdsCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final itemCount = ref.read(spotlightAdsProvider).length;
+    if (_lastItemCount != null && _lastItemCount != itemCount) {
+      _initialScrollApplied = false;
+      _initialScrollScheduled = false;
+      _focusedIndex = CarouselLayoutMetrics.initialFocusIndex(itemCount);
+    }
   }
 
-  /// 最後のカードがビューポート中央までスクロールできるよう右余白を追加する。
-  double _trailingPadding(_CarouselLayout layout) {
-    final extra = layout.viewportWidth / 2 -
-        layout.cardWidth / 2 -
-        layout.leadingPadding;
-    return math.max(0, extra);
+  Future<void> _afterProgrammaticScroll() async {
+    await SchedulerBinding.instance.endOfFrame;
+    if (!mounted) return;
+    _isProgrammaticScroll = false;
   }
 
-  _CarouselLayout _buildLayout(double viewportWidth) {
-    final cardWidth = _cardWidth(viewportWidth);
-    return _CarouselLayout(
-      viewportWidth: viewportWidth,
-      cardWidth: cardWidth,
-      itemStride: _itemStride(cardWidth),
-      leadingPadding: _leadingPadding(viewportWidth, cardWidth),
-    );
-  }
+  Future<void> _applyScrollOffset({
+    required double offset,
+    required int targetIndex,
+    required bool animate,
+  }) async {
+    _isProgrammaticScroll = true;
+    _focusedIndex = targetIndex;
+    setState(() {});
 
-  double _maxScrollExtent() {
-    if (!_scrollController.hasClients) return 0;
-    return _scrollController.position.maxScrollExtent;
-  }
+    if (animate) {
+      await _scrollController.animateTo(
+        offset,
+        duration: AppMotion.normal,
+        curve: AppMotion.curve,
+      );
+    } else {
+      _scrollController.jumpTo(offset);
+    }
 
-  /// フォーカス中カードがビューポート中央に来るオフセット（端ではクランプ）。
-  double _offsetForFocusIndex(int index, int count, _CarouselLayout layout) {
-    final raw = layout.leadingPadding +
-        index * layout.itemStride +
-        layout.cardWidth / 2 -
-        layout.viewportWidth / 2;
-    return raw.clamp(0.0, _maxScrollExtent());
+    await _afterProgrammaticScroll();
   }
-
-  int _focusIndexForOffset(double offset, int count, _CarouselLayout layout) {
-    final center = offset + layout.viewportWidth / 2;
-    final raw =
-        (center - layout.leadingPadding - layout.cardWidth / 2) / layout.itemStride;
-    return raw.round().clamp(0, count - 1);
-  }
-
-  double _itemCenterX(int index, _CarouselLayout layout) =>
-      layout.leadingPadding +
-      index * layout.itemStride +
-      layout.cardWidth / 2;
 
   bool _isWrapNavigation(int from, int to, int count) {
     if (count <= 1) return false;
@@ -109,76 +120,68 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
 
   Future<void> _navigateToIndex({
     required int target,
-    required int realCount,
-    required _CarouselLayout layout,
+    required int itemCount,
+    required CarouselLayoutMetrics layout,
   }) async {
     if (!_scrollController.hasClients || target == _focusedIndex) return;
 
-    final wrap = _isWrapNavigation(_focusedIndex, target, realCount);
-    final offset = _offsetForFocusIndex(target, realCount, layout);
+    final wrap = _isWrapNavigation(_focusedIndex, target, itemCount);
+    final offset =
+        layout.scrollOffsetForFocusIndex(target, itemCount: itemCount);
 
-    _isProgrammaticScroll = true;
-    _focusedIndex = target;
-    setState(() {});
-
-    if (wrap) {
-      _scrollController.jumpTo(offset);
-    } else {
-      await _scrollController.animateTo(
-        offset,
-        duration: AppMotion.normal,
-        curve: AppMotion.curve,
-      );
-    }
-
-    if (!mounted) return;
-    _isProgrammaticScroll = false;
+    await _applyScrollOffset(
+      offset: offset,
+      targetIndex: target,
+      animate: !wrap,
+    );
   }
 
-  void _goRelative({
+  Future<void> _goRelative({
     required int delta,
-    required int realCount,
-    required _CarouselLayout layout,
-  }) {
-    if (realCount <= 1) return;
-    final target = (_focusedIndex + delta + realCount) % realCount;
-    _navigateToIndex(
+    required int itemCount,
+    required CarouselLayoutMetrics layout,
+  }) async {
+    if (itemCount <= 1 || !_scrollController.hasClients) return;
+
+    final target = (_focusedIndex + delta + itemCount) % itemCount;
+    await _navigateToIndex(
       target: target,
-      realCount: realCount,
+      itemCount: itemCount,
       layout: layout,
     );
   }
 
   Future<void> _handleScrollEnd({
-    required int realCount,
-    required _CarouselLayout layout,
+    required int itemCount,
+    required CarouselLayoutMetrics layout,
   }) async {
-    if (_isProgrammaticScroll || realCount <= 1 || !_scrollController.hasClients) {
+    if (_isProgrammaticScroll ||
+        itemCount <= 1 ||
+        !_scrollController.hasClients) {
       return;
     }
 
-    final nearest = _focusIndexForOffset(
+    final nearest = layout.focusIndexForScrollOffset(
       _scrollController.offset,
-      realCount,
-      layout,
+      itemCount: itemCount,
     );
 
     if (nearest == _focusedIndex) return;
 
     await _navigateToIndex(
       target: nearest,
-      realCount: realCount,
+      itemCount: itemCount,
       layout: layout,
     );
   }
 
   bool _onScrollNotification(
     ScrollNotification notification, {
-    required int realCount,
-    required _CarouselLayout layout,
+    required int itemCount,
+    required CarouselLayoutMetrics layout,
   }) {
     if (notification is ScrollEndNotification) {
-      _handleScrollEnd(realCount: realCount, layout: layout);
+      _handleScrollEnd(itemCount: itemCount, layout: layout);
     }
     return false;
   }
@@ -194,7 +197,8 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
     final ads = ref.watch(spotlightAdsProvider);
     if (ads.isEmpty) return const SizedBox.shrink();
 
-    final realCount = ads.length;
+    final itemCount = ads.length;
+    final engine = _engine;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 24, 0, 16),
@@ -208,7 +212,11 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
           const SizedBox(height: 12),
           LayoutBuilder(
             builder: (context, constraints) {
-              final layout = _buildLayout(constraints.maxWidth);
+              final layout = engine.compute(constraints.maxWidth);
+              _scheduleInitialCenterFocus(
+                itemCount: itemCount,
+                layout: layout,
+              );
 
               return Stack(
                 alignment: Alignment.center,
@@ -217,32 +225,32 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
                   NotificationListener<ScrollNotification>(
                     onNotification: (n) => _onScrollNotification(
                       n,
-                      realCount: realCount,
+                      itemCount: itemCount,
                       layout: layout,
                     ),
                     child: SizedBox(
-                      height: _kCarouselHeight,
+                      height: engine.config.itemHeight,
                       child: ListView.separated(
                         controller: _scrollController,
                         scrollDirection: Axis.horizontal,
                         padding: EdgeInsets.only(
                           left: layout.leadingPadding,
-                          right: layout.leadingPadding +
-                              _trailingPadding(layout),
+                          right: layout.trailingPadding,
                         ),
                         physics: const ClampingScrollPhysics(),
-                        itemCount: realCount,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(width: _kItemSpacing),
+                        itemCount: itemCount,
+                        separatorBuilder: (_, __) => SizedBox(
+                          width: engine.config.itemSpacing,
+                        ),
                         itemBuilder: (context, index) {
                           final ad = ads[index];
                           return _ScaledCarouselItem(
                             scrollController: _scrollController,
-                            itemCenterX: _itemCenterX(index, layout),
+                            itemCenterX: layout.itemCenterX(index),
                             viewportWidth: layout.viewportWidth,
                             itemStride: layout.itemStride,
                             child: FeaturedAdCard(
-                              width: layout.cardWidth,
+                              width: layout.itemWidth,
                               ad: ad,
                               onTap: () => context.push(
                                 '/ads/${ad.id}?from=${widget.linkFrom}',
@@ -258,14 +266,14 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
                       child: _EdgeFadeMask(color: AppColors.background),
                     ),
                   ),
-                  if (realCount > 1) ...[
+                  if (itemCount > 1) ...[
                     Positioned(
                       left: 8,
                       child: _NavButton(
                         icon: Icons.chevron_left,
                         onPressed: () => _goRelative(
                           delta: -1,
-                          realCount: realCount,
+                          itemCount: itemCount,
                           layout: layout,
                         ),
                       ),
@@ -276,7 +284,7 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
                         icon: Icons.chevron_right,
                         onPressed: () => _goRelative(
                           delta: 1,
-                          realCount: realCount,
+                          itemCount: itemCount,
                           layout: layout,
                         ),
                       ),
@@ -286,12 +294,12 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
               );
             },
           ),
-          if (realCount > 1) ...[
+          if (itemCount > 1) ...[
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                for (var i = 0; i < realCount; i++)
+                for (var i = 0; i < itemCount; i++)
                   AnimatedContainer(
                     duration: AppMotion.fast,
                     margin: const EdgeInsets.symmetric(horizontal: 3),

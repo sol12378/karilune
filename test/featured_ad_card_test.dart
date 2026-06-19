@@ -46,4 +46,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('FeaturedAdCard does not overflow in carousel height', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 360));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final prefs = await SharedPreferences.getInstance();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              height: 360,
+              child: FeaturedAdCard(
+                ad: testAd,
+                width: 320,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
