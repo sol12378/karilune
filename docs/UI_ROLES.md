@@ -12,7 +12,7 @@
 | Shell | `AppShell` | `OperatorShell` | `OperatorShell` |
 | Layout | `MemberHomeLayout` | `OperatorHomeLayout` | `OperatorHomeLayout` |
 | 共通骨格 | `BrowseHomeLayout` | `BrowseHomeLayout` | `BrowseHomeLayout` |
-| 注目/お勧め | `FeaturedAdsCarousel`（注目） | `RecommendedCarousel`（お勧め） | なし |
+| 注目/お勧め | `FeaturedAdsCarousel`（注目） | グリッド内「お勧め」バッジ | なし |
 | カテゴリ | 左 Sidebar + 地域 | 左 Sidebar + 地域 | なし |
 | 実績パネル | なし | あり | あり |
 | カード | `AdCardConsumer` | `AdCardDistributor` | `AdCardAdvertiser` |

@@ -3,7 +3,7 @@
 /// | 画面 | Shell | Layout | 注目/お勧め | カテゴリ | 実績 | カード |
 /// |------|-------|--------|------------|---------|------|--------|
 /// | 会員 | AppShell | MemberHomeLayout | FeaturedAdsCarousel | Sidebar | なし | AdCardConsumer |
-/// | 配信 | OperatorShell | OperatorHomeLayout | RecommendedCarousel | Sidebar+地域 | あり | AdCardDistributor |
+/// | 配信 | OperatorShell | OperatorHomeLayout | グリッド内バッジ | Sidebar+地域 | あり | AdCardDistributor |
 /// | 投稿 | OperatorShell | OperatorHomeLayout | なし | なし | あり | AdCardAdvertiser |
 ///
 /// §3.2 ワイヤーフレームはオペレーター（配信/投稿）向け。

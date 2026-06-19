@@ -58,7 +58,7 @@ class HomeDistributorPage extends ConsumerWidget {
       mode: OperatorMode.distributor,
       navItems: distributorNavItems,
       child: OperatorHomeLayout(
-        showRecommended: true,
+        showRecommended: false,
         showPrefectureFilter: true,
         statsProvider: distributorPerformanceProvider,
         buildMain: (width) => DistributorAdsGrid(width: width),

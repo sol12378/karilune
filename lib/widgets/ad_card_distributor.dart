@@ -24,6 +24,12 @@ class AdCardDistributor extends StatelessWidget {
       networkUrl: ad.thumbnailUrl,
       onTap: onTap,
       thumbnailOverlays: [
+        if (ad.hasSpotlightOption)
+          const Positioned(
+            top: 6,
+            left: 6,
+            child: AdCardBadge(label: 'お勧め', color: AppColors.accent),
+          ),
         if (ad.isDistributing)
           const Positioned(
             top: 6,
