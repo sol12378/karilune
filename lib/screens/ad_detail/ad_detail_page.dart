@@ -11,16 +11,38 @@ import '../../utils/date_formats.dart';
 import '../../utils/pricing_calculator.dart';
 import '../../widgets/ad_thumbnail.dart';
 
-class AdDetailPage extends ConsumerWidget {
+class AdDetailPage extends ConsumerStatefulWidget {
   const AdDetailPage({super.key, required this.adId, this.fromMode});
 
   final String adId;
   final String? fromMode;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdDetailPage> createState() => _AdDetailPageState();
+}
+
+class _AdDetailPageState extends ConsumerState<AdDetailPage> {
+  var _viewCounted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final mode = widget.fromMode ??
+          GoRouterState.of(context).uri.queryParameters['from'] ??
+          'member';
+      if (mode == 'member' && !_viewCounted) {
+        _viewCounted = true;
+        ref.read(adRepositoryProvider.notifier).incrementViewCount(widget.adId);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final adId = widget.adId;
     final ad = ref.watch(adByIdProvider(adId));
-    final mode = fromMode ??
+    final mode = widget.fromMode ??
         GoRouterState.of(context).uri.queryParameters['from'] ??
         'member';
     final isMemberMode = mode == 'member';

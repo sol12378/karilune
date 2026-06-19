@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import 'ad_publication_status.dart';
+
 part 'ad.freezed.dart';
 
 @freezed
@@ -29,6 +31,7 @@ class Ad with _$Ad {
     @Default('愛知県') String prefecture,
     @Default(false) bool isAdvertiserAd,
     @Default(false) bool wasDistributed,
+    @Default(AdPublicationStatus.published) AdPublicationStatus publicationStatus,
   }) = _Ad;
 
   const Ad._();
@@ -43,4 +46,14 @@ class Ad with _$Ad {
   bool get isScheduled => DateTime.now().isBefore(startDate);
 
   bool get isEnded => !DateTime.now().isBefore(endDate);
+
+  bool get isVisibleToCatalog =>
+      publicationStatus == AdPublicationStatus.published;
+
+  bool get isDraft => publicationStatus == AdPublicationStatus.draft;
+
+  bool get isPendingReview =>
+      publicationStatus == AdPublicationStatus.pendingReview;
+
+  bool get isRejected => publicationStatus == AdPublicationStatus.rejected;
 }

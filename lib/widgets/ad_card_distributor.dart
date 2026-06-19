@@ -11,11 +11,13 @@ class AdCardDistributor extends StatelessWidget {
     required this.ad,
     this.onTap,
     this.onToggleDistribute,
+    this.distributeLabel,
   });
 
   final Ad ad;
   final VoidCallback? onTap;
   final VoidCallback? onToggleDistribute;
+  final String? distributeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +73,8 @@ class AdCardDistributor extends StatelessWidget {
                   ad.isDistributing ? AppColors.distributing : AppColors.primary,
             ),
             child: Text(
-              ad.isDistributing ? '配信停止' : '配信する',
+              distributeLabel ??
+                  (ad.isDistributing ? '配信停止' : '配信する'),
               style: const TextStyle(fontSize: 12),
             ),
           ),

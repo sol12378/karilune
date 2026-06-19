@@ -15,7 +15,7 @@ class MemberHomeLayout extends StatelessWidget {
   const MemberHomeLayout({
     super.key,
     required this.buildMain,
-    this.showDemoAdminLink = true,
+    this.showDemoAdminLink = false,
   });
 
   final Widget Function(double mainContentWidth) buildMain;

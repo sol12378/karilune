@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/ad_repository.dart';
 import '../models/ad.dart';
 import '../models/ad_form_state.dart';
+import '../models/ad_publication_status.dart';
+import '../models/notification.dart';
+import 'notification_repository.dart';
 
 final adFormProvider =
     StateNotifierProvider<AdFormNotifier, AdFormState>((ref) {
@@ -13,8 +16,12 @@ class AdFormNotifier extends StateNotifier<AdFormState> {
   AdFormNotifier(this._ref) : super(const AdFormState());
 
   final Ref _ref;
+  String? _pendingAdId;
+
+  String? get pendingAdId => _pendingAdId;
 
   void startCreate() {
+    _pendingAdId = null;
     state = AdFormState(
       isEditMode: false,
       startDate: DateTime.now(),
@@ -24,6 +31,7 @@ class AdFormNotifier extends StateNotifier<AdFormState> {
   }
 
   void startEdit(Ad ad) {
+    _pendingAdId = null;
     state = const AdFormState().fromAd(ad);
   }
 
@@ -103,16 +111,15 @@ class AdFormNotifier extends StateNotifier<AdFormState> {
     }
   }
 
-  void submit() {
+  Ad _buildAd({required AdPublicationStatus publicationStatus, String? id}) {
     final form = state;
-    final id = form.isEditMode
-        ? form.editingAdId!
-        : 'ad-${DateTime.now().millisecondsSinceEpoch}';
+    final adId = id ??
+        form.editingAdId ??
+        'ad-${DateTime.now().millisecondsSinceEpoch}';
+    final existing = _ref.read(adRepositoryProvider.notifier).findById(adId);
 
-    final existing = _ref.read(adRepositoryProvider.notifier).findById(id);
-
-    final ad = Ad(
-      id: id,
+    return Ad(
+      id: adId,
       companyName: form.companyName.trim(),
       catchCopy: form.catchCopy.trim(),
       prText: form.prText.trim(),
@@ -128,12 +135,63 @@ class AdFormNotifier extends StateNotifier<AdFormState> {
           form.hasDistributionSettingNotification,
       isOwnAd: true,
       isAdvertiserAd: true,
+      publicationStatus: publicationStatus,
       distributorCount: existing?.distributorCount ?? 0,
       viewCount: existing?.viewCount ?? 0,
       isDistributing: existing?.isDistributing ?? false,
+      advertiserCompanyName: '株式会社○○ガス 広告部',
+      advertiserUrl: 'https://gas-company.example.com/ad',
+      advertiserTel: '052-000-1111',
+      advertiserContact: '広報 けんじゃ',
     );
+  }
 
+  void submit() {
+    final form = state;
+    final id = form.isEditMode
+        ? form.editingAdId!
+        : 'ad-${DateTime.now().millisecondsSinceEpoch}';
+    final existing = _ref.read(adRepositoryProvider.notifier).findById(id);
+    final ad = _buildAd(
+      publicationStatus:
+          existing?.publicationStatus ?? AdPublicationStatus.published,
+      id: id,
+    );
     _ref.read(adRepositoryProvider.notifier).upsert(ad);
     startCreate();
+  }
+
+  String submitForReview() {
+    final ad = _buildAd(publicationStatus: AdPublicationStatus.pendingReview);
+    _pendingAdId = ad.id;
+    _ref.read(adRepositoryProvider.notifier).upsert(ad);
+    return ad.id;
+  }
+
+  String completePayment() {
+    final id = _pendingAdId;
+    if (id == null) {
+      throw StateError('No pending ad for payment');
+    }
+    final ad = _buildAd(
+      publicationStatus: AdPublicationStatus.published,
+      id: id,
+    );
+    _ref.read(adRepositoryProvider.notifier).publishAfterPayment(ad);
+
+    _ref.read(notificationRepositoryProvider.notifier).addNotification(
+          AppNotification(
+            id: 'dyn-${DateTime.now().millisecondsSinceEpoch}',
+            title: '新規広告が追加されました',
+            body: '「${ad.companyName}」が配信候補に追加されました。',
+            createdAt: DateTime.now(),
+            adId: ad.id,
+            targetRoute: '/ads/${ad.id}?from=distributor',
+          ),
+        );
+
+    _pendingAdId = null;
+    startCreate();
+    return id;
   }
 }

@@ -15,6 +15,7 @@ class OperatorHomeLayout extends ConsumerWidget {
     this.showPerformancePanel = true,
     this.showCategorySidebar = true,
     this.showPrefectureFilter = false,
+    this.mainHeader,
     required this.statsProvider,
     required this.buildMain,
   });
@@ -23,6 +24,7 @@ class OperatorHomeLayout extends ConsumerWidget {
   final bool showPerformancePanel;
   final bool showCategorySidebar;
   final bool showPrefectureFilter;
+  final Widget? mainHeader;
   final ProviderListenable<PastPerformanceStats> statsProvider;
   final Widget Function(double mainContentWidth) buildMain;
 
@@ -32,6 +34,7 @@ class OperatorHomeLayout extends ConsumerWidget {
       featured: showRecommended ? const RecommendedCarousel() : null,
       showCategorySidebar: showCategorySidebar,
       showPrefectureFilter: showPrefectureFilter,
+      mainHeader: mainHeader,
       buildMain: buildMain,
       trailingPanel: showPerformancePanel
           ? PastPerformancePanel(statsProvider: statsProvider)

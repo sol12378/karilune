@@ -1,4 +1,5 @@
 import '../models/ad.dart';
+import '../models/ad_publication_status.dart';
 
 String assetPath(int index) {
   final number = ((index - 1) % 8) + 1;
@@ -399,6 +400,43 @@ final mockAds = <Ad>[
     advertiserUrl: 'https://art-sou.example.com',
     advertiserTel: '052-909-0101',
     advertiserContact: '講師 岡田',
+  ),
+  Ad(
+    id: 'ad-story-draft',
+    companyName: '【下書き】夏のガスフェア',
+    catchCopy: 'ガスコンロ買い替えキャンペーン（作成中）',
+    prText: '下書き保存中の広告です。内容確定後に審査申込できます。',
+    thumbnailAssetPath: assetPath(1),
+    category: '生活トラブル・修理',
+    prefecture: '愛知県',
+    startDate: DateTime.now().add(const Duration(days: 14)),
+    distributionDays: 30,
+    isOwnAd: true,
+    isAdvertiserAd: true,
+    publicationStatus: AdPublicationStatus.draft,
+    advertiserCompanyName: '株式会社○○ガス 広告部',
+    advertiserUrl: 'https://gas-company.example.com/ad',
+    advertiserTel: '052-000-1111',
+    advertiserContact: '広報 けんじゃ',
+  ),
+  Ad(
+    id: 'ad-story-pending',
+    companyName: '【審査中】エコ給湯器キャンペーン',
+    catchCopy: '高効率給湯器への買い替え支援',
+    prText: '審査完了後に配信者へ公開されます。決済済み・公開待ちの状態です。',
+    thumbnailAssetPath: assetPath(3),
+    category: '生活トラブル・修理',
+    prefecture: '岐阜県',
+    startDate: DateTime.now().add(const Duration(days: 7)),
+    distributionDays: 45,
+    hasSpotlightOption: true,
+    isOwnAd: true,
+    isAdvertiserAd: true,
+    publicationStatus: AdPublicationStatus.pendingReview,
+    advertiserCompanyName: '株式会社○○ガス 広告部',
+    advertiserUrl: 'https://gas-company.example.com/ad',
+    advertiserTel: '052-000-1111',
+    advertiserContact: '広報 けんじゃ',
   ),
   Ad(
     id: 'own-ad-001',

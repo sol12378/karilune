@@ -6,10 +6,16 @@ import '../../data/ad_repository.dart';
 import '../../models/ad.dart';
 import '../../providers/ad_list_provider.dart';
 import '../../providers/operator_stats_provider.dart';
+import '../../theme/breakpoints.dart';
 import '../../widgets/ad_card_distributor.dart';
 import '../../widgets/ad_grid.dart';
+import '../../widgets/ad_grid_skeleton.dart';
 import '../../widgets/app_shell.dart';
+import '../../widgets/common/section_header.dart';
+import '../../widgets/demo_async_wrapper.dart';
+import '../../widgets/distributor_sort_chips.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/member_filter_bar.dart';
 import '../../widgets/operator/operator_home_layout.dart';
 import '../../widgets/operator/operator_mode.dart';
 import '../../widgets/operator/operator_shell.dart';
@@ -57,26 +63,67 @@ class HomeDistributorPage extends ConsumerWidget {
       currentLocation: location,
       mode: OperatorMode.distributor,
       navItems: distributorNavItems,
-      child: OperatorHomeLayout(
-        showRecommended: false,
-        showPrefectureFilter: true,
-        statsProvider: distributorPerformanceProvider,
-        buildMain: (width) => DistributorAdsGrid(width: width),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final showFilterBar = constraints.maxWidth < Breakpoints.mobile;
+
+          return Stack(
+            children: [
+              OperatorHomeLayout(
+                showRecommended: false,
+                showPrefectureFilter: true,
+                statsProvider: distributorPerformanceProvider,
+                mainHeader: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SectionHeader(
+                      title: '配信候補の広告',
+                      subtitle: '並び替え・フィルタで探して配信ON',
+                    ),
+                    DistributorSortChips(),
+                  ],
+                ),
+                buildMain: (width) => DemoAsyncWrapper(
+                  cacheKey: 'distributor-home-grid',
+                  loading: AdGridSkeleton(
+                    crossAxisCount: width >= Breakpoints.desktop ? 3 : 2,
+                  ),
+                  builder: () => DistributorAdsGrid(
+                    width: width,
+                    bottomPadding: showFilterBar ? 80 : 24,
+                  ),
+                ),
+              ),
+              if (showFilterBar)
+                const Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: MemberFilterBar(),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
 class DistributorAdsGrid extends ConsumerWidget {
-  const DistributorAdsGrid({super.key, required this.width});
+  const DistributorAdsGrid({
+    super.key,
+    required this.width,
+    required this.bottomPadding,
+  });
 
   final double width;
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ads = ref.watch(filteredAdsProvider);
+    final split = ref.watch(distributorAdsSplitProvider);
 
-    if (ads.isEmpty) {
+    if (split.all.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 48),
         child: EmptyState(
@@ -87,10 +134,37 @@ class DistributorAdsGrid extends ConsumerWidget {
       );
     }
 
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16, 0, 16, bottomPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (split.ownDistributing.isNotEmpty) ...[
+            const SectionHeader(
+              title: '配信中の自社広告',
+              subtitle: '現在会員へ配信中の自社分',
+            ),
+            _buildGrid(context, ref, split.ownDistributing),
+            const SizedBox(height: 16),
+          ],
+          if (split.candidates.isNotEmpty) ...[
+            if (split.ownDistributing.isNotEmpty)
+              const SectionHeader(
+                title: '配信候補・お勧め',
+                subtitle: '未配信の広告を選んで配信開始',
+              ),
+            _buildGrid(context, ref, split.candidates),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGrid(BuildContext context, WidgetRef ref, List<Ad> ads) {
     return AdGridView.builder(
       width: width,
       shrinkWrap: true,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.only(bottom: 8),
       itemCount: ads.length,
       itemBuilder: (context, index) {
         final ad = ads[index];

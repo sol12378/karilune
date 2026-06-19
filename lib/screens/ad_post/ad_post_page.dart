@@ -28,7 +28,7 @@ class AdPostPage extends ConsumerWidget {
       hasDistributionSettingNotification:
           form.hasDistributionSettingNotification,
     );
-    final maxStep = form.isEditMode ? 2 : 3;
+    final maxStep = form.isEditMode ? 2 : 4;
 
     return Scaffold(
       appBar: AppBar(
@@ -50,30 +50,27 @@ class AdPostPage extends ConsumerWidget {
           }
 
           if (form.currentStep < maxStep) {
+            if (!form.isEditMode && form.currentStep == 3) {
+              notifier.submitForReview();
+            }
             notifier.setStep(form.currentStep + 1);
             return;
           }
 
-          if (!form.isEditMode) {
-            final confirmed = await showConfirmDialog(
-              context,
-              title: '投稿の確認',
-              message: 'この内容で広告を投稿しますか？',
-              confirmLabel: '投稿する',
-            );
-            if (!confirmed) return;
+          if (form.isEditMode) {
+            notifier.submit();
+            if (context.mounted) {
+              context.go('/advertiser/home');
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('広告を更新しました')),
+              );
+            }
+            return;
           }
 
-          notifier.submit();
+          final adId = notifier.completePayment();
           if (context.mounted) {
-            context.go('/advertiser/home');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  form.isEditMode ? '広告を更新しました' : '広告を投稿しました',
-                ),
-              ),
-            );
+            context.go('/advertiser/ads/complete/$adId');
           }
         },
         onStepCancel: () {
@@ -82,6 +79,7 @@ class AdPostPage extends ConsumerWidget {
           }
         },
         controlsBuilder: (context, details) {
+          final isPaymentStep = !form.isEditMode && form.currentStep == maxStep;
           return Padding(
             padding: const EdgeInsets.only(top: 16),
             child: Row(
@@ -96,7 +94,9 @@ class AdPostPage extends ConsumerWidget {
                   onPressed: details.onStepContinue,
                   child: Text(
                     form.currentStep == maxStep
-                        ? (form.isEditMode ? '保存する' : '投稿する')
+                        ? (form.isEditMode
+                            ? '保存する'
+                            : (isPaymentStep ? '支払う' : '次へ'))
                         : '次へ',
                   ),
                 ),
@@ -340,20 +340,16 @@ class AdPostPage extends ConsumerWidget {
                       : (value) =>
                           notifier.toggleDistributionSetting(value ?? false),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  '合計金額: ${PricingCalculator.formatYen(total)}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
               ],
             ),
           ),
           if (!form.isEditMode)
             Step(
-              title: const Text('プレビュー'),
+              title: const Text('料金確認'),
               isActive: form.currentStep >= 3,
+              state: form.currentStep > 3
+                  ? StepState.complete
+                  : StepState.indexed,
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -362,13 +358,112 @@ class AdPostPage extends ConsumerWidget {
                   SizedBox(
                     height: 300,
                     width: 280,
-                    child: AdCardConsumer(
-                      ad: form.toPreviewAd(),
+                    child: AdCardConsumer(ad: form.toPreviewAd()),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('料金内訳'),
+                  const SizedBox(height: 8),
+                  _PricingLine(
+                    label: '基本配信料',
+                    value: PricingCalculator.formatYen(
+                      form.distributionDays * 1000,
                     ),
+                  ),
+                  if (form.hasSpotlightOption)
+                    _PricingLine(
+                      label: '注目オプション',
+                      value: PricingCalculator.formatYen(
+                        form.distributionDays * 100,
+                      ),
+                    ),
+                  if (form.hasDistributionRequestNotification)
+                    _PricingLine(
+                      label: '配信依頼通知',
+                      value: PricingCalculator.formatYen(3000),
+                    ),
+                  if (form.hasDistributionSettingNotification)
+                    _PricingLine(
+                      label: '配信設定通知',
+                      value: PricingCalculator.formatYen(3000),
+                    ),
+                  const Divider(),
+                  _PricingLine(
+                    label: '合計',
+                    value: PricingCalculator.formatYen(total),
+                    bold: true,
                   ),
                 ],
               ),
             ),
+          if (!form.isEditMode)
+            Step(
+              title: const Text('モック決済'),
+              isActive: form.currentStep >= 4,
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'お支払い金額: ${PricingCalculator.formatYen(total)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'カード番号（デモ）',
+                      hintText: '4242 4242 4242 4242',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: '有効期限（デモ）',
+                      hintText: '12/28',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'デモ用のモック決済です。実際の課金は発生しません。',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PricingLine extends StatelessWidget {
+  const _PricingLine({
+    required this.label,
+    required this.value,
+    this.bold = false,
+  });
+
+  final String label;
+  final String value;
+  final bool bold;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = bold
+        ? Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            )
+        : Theme.of(context).textTheme.bodyMedium;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: style),
+          Text(value, style: style),
         ],
       ),
     );

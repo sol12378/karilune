@@ -3,15 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../mock_data/notifications_mock.dart';
-import '../../models/notification.dart';
+import '../../providers/notification_repository.dart';
 import '../../widgets/admin_shell.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/operator/operator_mode.dart';
 import '../../widgets/operator/operator_shell.dart';
 
-class NotificationsPage extends ConsumerStatefulWidget {
+class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({
     super.key,
     required this.role,
@@ -34,22 +33,12 @@ class NotificationsPage extends ConsumerStatefulWidget {
   final String? shellTitle;
 
   @override
-  ConsumerState<NotificationsPage> createState() => _NotificationsPageState();
-}
-
-class _NotificationsPageState extends ConsumerState<NotificationsPage> {
-  late List<AppNotification> _items;
-
-  @override
-  void initState() {
-    super.initState();
-    _items = notificationsForRole(widget.role);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch(roleNotificationsProvider(role));
     final dateFormat = DateFormat('MM/dd HH:mm');
-    final body = _items.isEmpty
+    final notifier = ref.read(notificationRepositoryProvider.notifier);
+
+    final body = items.isEmpty
         ? const EmptyState(
             icon: Icons.notifications_none_outlined,
             title: '通知はありません',
@@ -57,10 +46,10 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
           )
         : ListView.separated(
             padding: const EdgeInsets.all(16),
-            itemCount: _items.length,
+            itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
-              final item = _items[index];
+              final item = items[index];
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
@@ -94,49 +83,52 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     ],
                   ),
                   isThreeLine: true,
+                  trailing: item.targetRoute != null
+                      ? const Icon(Icons.chevron_right)
+                      : null,
                   onTap: () {
-                    setState(() {
-                      _items[index] = AppNotification(
-                        id: item.id,
-                        title: item.title,
-                        body: item.body,
-                        createdAt: item.createdAt,
-                        isRead: true,
-                      );
-                    });
+                    notifier.markRead(item.id);
+                    if (item.targetRoute != null) {
+                      final route = item.targetRoute!;
+                      if (route.startsWith('/ads/')) {
+                        context.push(route);
+                      } else {
+                        context.go(route);
+                      }
+                    }
                   },
                 ),
               );
             },
           );
 
-    if (widget.useOperatorShell) {
+    if (useOperatorShell) {
       final location = GoRouterState.of(context).matchedLocation;
       return OperatorShell(
         currentLocation: location,
         mode: OperatorModeX.fromLocation(location),
-        navItems: widget.navItems,
-        title: widget.shellTitle ?? '通知',
+        navItems: navItems,
+        title: shellTitle ?? '通知',
         child: body,
       );
     }
 
-    if (widget.useAdminShell) {
+    if (useAdminShell) {
       return AdminShell(
         currentLocation: GoRouterState.of(context).matchedLocation,
-        navItems: widget.navItems,
-        selectedNavIndex: widget.selectedNavIndex,
-        onNavTap: widget.onNavTap,
-        title: widget.shellTitle ?? '通知',
+        navItems: navItems,
+        selectedNavIndex: selectedNavIndex,
+        onNavTap: onNavTap,
+        title: shellTitle ?? '通知',
         child: body,
       );
     }
 
     return AppShell(
       currentLocation: GoRouterState.of(context).matchedLocation,
-      navItems: widget.navItems,
-      selectedNavIndex: widget.selectedNavIndex,
-      onNavTap: widget.onNavTap!,
+      navItems: navItems,
+      selectedNavIndex: selectedNavIndex,
+      onNavTap: onNavTap!,
       child: body,
     );
   }

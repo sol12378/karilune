@@ -5,11 +5,15 @@ import 'package:go_router/go_router.dart';
 import 'data/ad_repository.dart';
 import 'providers/ad_form_provider.dart';
 import 'providers/account_provider.dart';
+import 'providers/auth_provider.dart';
 import 'screens/account/account_page.dart';
 import 'screens/ad_detail/ad_detail_page.dart';
+import 'screens/ad_post/ad_post_completion_page.dart';
 import 'screens/ad_post/ad_post_page.dart';
 import 'screens/admin/admin_dashboard_page.dart';
+import 'screens/admin/featured_placements_page.dart';
 import 'screens/advertiser/advertiser_history_page.dart';
+import 'screens/auth/login_page.dart';
 import 'screens/distributor/club_team_page.dart';
 import 'screens/distributor/distributor_favorites_page.dart';
 import 'screens/distributor/distributor_history_page.dart';
@@ -20,142 +24,164 @@ import 'screens/member_favorites/member_favorites_page.dart';
 import 'screens/notifications/notifications_page.dart';
 import 'widgets/app_shell.dart';
 
-final appRouter = GoRouter(
-  initialLocation: '/member/home',
-  routes: [
-    GoRoute(
-      path: '/member/home',
-      builder: (context, state) => const HomeMemberPage(),
-    ),
-    GoRoute(
-      path: '/member/favorites',
-      builder: (context, state) => const MemberFavoritesPage(),
-    ),
-    GoRoute(
-      path: '/member/notifications',
-      builder: (context, state) => NotificationsPage(
-        role: 'member',
-        homeRoute: '/member/home',
-        navItems: memberNavItems,
-        selectedNavIndex:
-            navIndexForLocation(memberNavItems, state.matchedLocation),
-        onNavTap: (index) => context.go(memberNavItems[index].location),
+final routerProvider = Provider<GoRouter>((ref) {
+  final auth = ref.watch(authProvider);
+
+  return GoRouter(
+    initialLocation: '/login',
+    redirect: (context, state) =>
+        authRedirect(state.matchedLocation, auth),
+    routes: [
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginPage(),
       ),
-    ),
-    GoRoute(
-      path: '/member/account',
-      builder: (context, state) => AccountPage(
-        accountProvider: memberAccountProvider,
-        navItems: memberNavItems,
-        selectedNavIndex:
-            navIndexForLocation(memberNavItems, state.matchedLocation),
-        onNavTap: (index) => context.go(memberNavItems[index].location),
-        showDemoAdminLink: true,
+      GoRoute(
+        path: '/member/home',
+        builder: (context, state) => const HomeMemberPage(),
       ),
-    ),
-    GoRoute(
-      path: '/admin/dashboard',
-      builder: (context, state) => const AdminDashboardPage(),
-    ),
-    GoRoute(
-      path: '/distributor/home',
-      builder: (context, state) => const HomeDistributorPage(),
-    ),
-    GoRoute(
-      path: '/distributor/favorites',
-      builder: (context, state) => const DistributorFavoritesPage(),
-    ),
-    GoRoute(
-      path: '/distributor/club-team',
-      builder: (context, state) => const ClubTeamPage(),
-    ),
-    GoRoute(
-      path: '/distributor/history',
-      builder: (context, state) => const DistributorHistoryPage(),
-    ),
-    GoRoute(
-      path: '/distributor/notifications',
-      builder: (context, state) => NotificationsPage(
-        role: 'distributor',
-        homeRoute: '/distributor/home',
-        useOperatorShell: true,
-        shellTitle: '通知',
-        navItems: distributorNavItems,
-        selectedNavIndex:
-            navIndexForLocation(distributorNavItems, state.matchedLocation),
-        onNavTap: (index) => context.go(distributorNavItems[index].location),
+      GoRoute(
+        path: '/member/favorites',
+        builder: (context, state) => const MemberFavoritesPage(),
       ),
-    ),
-    GoRoute(
-      path: '/distributor/account',
-      builder: (context, state) => AccountPage(
-        accountProvider: distributorAccountProvider,
-        useOperatorShell: true,
-        shellTitle: 'アカウント',
-        navItems: distributorNavItems,
-        selectedNavIndex:
-            navIndexForLocation(distributorNavItems, state.matchedLocation),
-        onNavTap: (index) => context.go(distributorNavItems[index].location),
+      GoRoute(
+        path: '/member/notifications',
+        builder: (context, state) => NotificationsPage(
+          role: 'member',
+          homeRoute: '/member/home',
+          navItems: memberNavItems,
+          selectedNavIndex:
+              navIndexForLocation(memberNavItems, state.matchedLocation),
+          onNavTap: (index) => context.go(memberNavItems[index].location),
+        ),
       ),
-    ),
-    GoRoute(
-      path: '/advertiser/home',
-      builder: (context, state) => const HomeAdvertiserPage(),
-    ),
-    GoRoute(
-      path: '/advertiser/history',
-      builder: (context, state) => const AdvertiserHistoryPage(),
-    ),
-    GoRoute(
-      path: '/advertiser/notifications',
-      builder: (context, state) => NotificationsPage(
-        role: 'advertiser',
-        homeRoute: '/advertiser/home',
-        useOperatorShell: true,
-        shellTitle: '通知',
-        navItems: advertiserNavItems,
-        selectedNavIndex:
-            navIndexForLocation(advertiserNavItems, state.matchedLocation),
-        onNavTap: (index) => context.go(advertiserNavItems[index].location),
+      GoRoute(
+        path: '/member/account',
+        builder: (context, state) => AccountPage(
+          accountProvider: memberAccountProvider,
+          navItems: memberNavItems,
+          selectedNavIndex:
+              navIndexForLocation(memberNavItems, state.matchedLocation),
+          onNavTap: (index) => context.go(memberNavItems[index].location),
+        ),
       ),
-    ),
-    GoRoute(
-      path: '/advertiser/account',
-      builder: (context, state) => AccountPage(
-        accountProvider: advertiserAccountProvider,
-        useOperatorShell: true,
-        shellTitle: 'アカウント',
-        navItems: advertiserNavItems,
-        selectedNavIndex:
-            navIndexForLocation(advertiserNavItems, state.matchedLocation),
-        onNavTap: (index) => context.go(advertiserNavItems[index].location),
+      GoRoute(
+        path: '/admin/dashboard',
+        builder: (context, state) => const AdminDashboardPage(),
       ),
-    ),
-    GoRoute(
-      path: '/ads/:id',
-      builder: (context, state) {
-        final adId = state.pathParameters['id']!;
-        return AdDetailPage(
-          adId: adId,
-          fromMode: state.uri.queryParameters['from'],
-        );
-      },
-    ),
-    GoRoute(
-      path: '/advertiser/ads/new',
-      builder: (context, state) {
-        return const _AdPostRouteWrapper(isEdit: false);
-      },
-    ),
-    GoRoute(
-      path: '/advertiser/ads/:id/edit',
-      builder: (context, state) {
-        final adId = state.pathParameters['id']!;
-        return _AdPostRouteWrapper(isEdit: true, adId: adId);
-      },
-    ),
-  ],
-);
+      GoRoute(
+        path: '/admin/featured-placements',
+        builder: (context, state) => const FeaturedPlacementsPage(),
+      ),
+      GoRoute(
+        path: '/distributor/home',
+        builder: (context, state) => const HomeDistributorPage(),
+      ),
+      GoRoute(
+        path: '/distributor/favorites',
+        builder: (context, state) => const DistributorFavoritesPage(),
+      ),
+      GoRoute(
+        path: '/distributor/club-team',
+        builder: (context, state) => const ClubTeamPage(),
+      ),
+      GoRoute(
+        path: '/distributor/history',
+        builder: (context, state) => const DistributorHistoryPage(),
+      ),
+      GoRoute(
+        path: '/distributor/notifications',
+        builder: (context, state) => NotificationsPage(
+          role: 'distributor',
+          homeRoute: '/distributor/home',
+          useOperatorShell: true,
+          shellTitle: '通知',
+          navItems: distributorNavItems,
+          selectedNavIndex:
+              navIndexForLocation(distributorNavItems, state.matchedLocation),
+          onNavTap: (index) => context.go(distributorNavItems[index].location),
+        ),
+      ),
+      GoRoute(
+        path: '/distributor/account',
+        builder: (context, state) => AccountPage(
+          accountProvider: distributorAccountProvider,
+          useOperatorShell: true,
+          shellTitle: 'アカウント',
+          navItems: distributorNavItems,
+          selectedNavIndex:
+              navIndexForLocation(distributorNavItems, state.matchedLocation),
+          onNavTap: (index) => context.go(distributorNavItems[index].location),
+          showAdminLink: true,
+        ),
+      ),
+      GoRoute(
+        path: '/advertiser/home',
+        builder: (context, state) => const HomeAdvertiserPage(),
+      ),
+      GoRoute(
+        path: '/advertiser/history',
+        builder: (context, state) => const AdvertiserHistoryPage(),
+      ),
+      GoRoute(
+        path: '/advertiser/notifications',
+        builder: (context, state) => NotificationsPage(
+          role: 'advertiser',
+          homeRoute: '/advertiser/home',
+          useOperatorShell: true,
+          shellTitle: '通知',
+          navItems: advertiserNavItems,
+          selectedNavIndex:
+              navIndexForLocation(advertiserNavItems, state.matchedLocation),
+          onNavTap: (index) => context.go(advertiserNavItems[index].location),
+        ),
+      ),
+      GoRoute(
+        path: '/advertiser/account',
+        builder: (context, state) => AccountPage(
+          accountProvider: advertiserAccountProvider,
+          useOperatorShell: true,
+          shellTitle: 'アカウント',
+          navItems: advertiserNavItems,
+          selectedNavIndex:
+              navIndexForLocation(advertiserNavItems, state.matchedLocation),
+          onNavTap: (index) => context.go(advertiserNavItems[index].location),
+          showAdminLink: true,
+        ),
+      ),
+      GoRoute(
+        path: '/ads/:id',
+        builder: (context, state) {
+          final adId = state.pathParameters['id']!;
+          return AdDetailPage(
+            adId: adId,
+            fromMode: state.uri.queryParameters['from'],
+          );
+        },
+      ),
+      GoRoute(
+        path: '/advertiser/ads/new',
+        builder: (context, state) {
+          return const _AdPostRouteWrapper(isEdit: false);
+        },
+      ),
+      GoRoute(
+        path: '/advertiser/ads/:id/edit',
+        builder: (context, state) {
+          final adId = state.pathParameters['id']!;
+          return _AdPostRouteWrapper(isEdit: true, adId: adId);
+        },
+      ),
+      GoRoute(
+        path: '/advertiser/ads/complete/:id',
+        builder: (context, state) {
+          final adId = state.pathParameters['id']!;
+          return AdPostCompletionPage(adId: adId);
+        },
+      ),
+    ],
+  );
+});
 
 class _AdPostRouteWrapper extends ConsumerStatefulWidget {
   const _AdPostRouteWrapper({required this.isEdit, this.adId});
