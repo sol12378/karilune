@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配信チャネル — 配信者 — カリルネ</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/operator.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-row"><div class="logo-icon">🔥</div>カリルネ</div>
+        <span class="mode-label">広告配信モード</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="distributor.html"><span class="nav-icon">🏠</span> ホーム</a>
+        <a href="distributor.html#distributing"><span class="nav-icon">📡</span> 配信中</a>
+        <a href="distributor.html#candidates"><span class="nav-icon">🔍</span> 配信候補</a>
+        <a href="distributor-channels.html" class="active"><span class="nav-icon">🔗</span> 配信チャネル</a>
+        <a href="distributor.html#history"><span class="nav-icon">📋</span> 配信履歴</a>
+        <a href="#"><span class="nav-icon">🔔</span> 通知</a>
+        <a href="#"><span class="nav-icon">👤</span> アカウント</a>
+      </nav>
+      <div class="sidebar-footer"><a href="index.html">← ポータルに戻る</a></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="mobile-nav-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1>配信チャネル設定</h1>
+        </div>
+        <a href="consumer.html" class="btn btn-primary btn-sm">会員画面プレビュー</a>
+      </header>
+
+      <div class="page-body">
+        <p style="font-size:var(--text-base);color:var(--text-secondary);margin-bottom:24px;max-width:640px;line-height:1.7">
+          配信者が選んだ広告は、以下のチャネルから会員（消費者）に届きます。
+          会員は<strong style="color:var(--text)">あなたのガス会社経由</strong>でのみ広告を閲覧できます。
+        </p>
+
+        <div class="channel-card">
+          <h3>📱 会員アプリ / Webフィード</h3>
+          <p>ガス会員がログインして見る Instagram型フィード。配信中の広告が自動表示されます。</p>
+          <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+            <div>
+              <div style="font-size:var(--text-xs);font-weight:600;color:var(--text-muted);margin-bottom:6px">会員向けURL</div>
+              <span class="url-chip">https://karilune.app/d/nagoya-gas</span>
+            </div>
+            <a href="consumer.html" class="btn btn-primary">プレビューを開く →</a>
+          </div>
+        </div>
+
+        <div class="channel-card">
+          <h3>🌐 ガス会社HP 埋め込みウィジェット</h3>
+          <p>公式サイトに「おすすめ情報」セクションとして埋め込み。</p>
+          <div class="embed-code">&lt;script src="https://karilune.app/embed.js"
+  data-distributor="nagoya-gas"&gt;&lt;/script&gt;
+&lt;div id="karilune-feed"&gt;&lt;/div&gt;</div>
+          <button class="btn btn-outline btn-sm" style="margin-top:12px" onclick="navigator.clipboard?.writeText(document.querySelector('.embed-code').textContent)">コードをコピー</button>
+        </div>
+
+        <div class="channel-card">
+          <h3>📄 チラシ・訪問時 QRコード</h3>
+          <p>ガス検針時のチラシや訪問時のQRから会員を直接フィードへ誘導。「顔の見える配信者」からの信頼を活用。</p>
+          <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+            <div class="qr-box" aria-label="QRコード">▣</div>
+            <div>
+              <p style="font-size:var(--text-sm);margin-bottom:8px"><strong>QRリンク先:</strong> 会員フィード</p>
+              <p style="font-size:var(--text-xs);color:var(--text-muted);line-height:1.6">
+                スキャン → 「○○ガス 名古屋支店からのおすすめ」が開く<br>
+                初回は会員登録へ誘導
+              </p>
+              <button class="btn btn-outline btn-sm" style="margin-top:12px">QRをダウンロード（PDF）</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="channel-card">
+          <h3>🔔 プッシュ通知</h3>
+          <p>新しいおすすめ広告を配信開始した際、会員アプリに通知。</p>
+          <div class="notif-preview">
+            <div class="from">○○ガス 名古屋支店</div>
+            <div class="body">今月のおすすめ：週末限定焼肉フェア開催中 🥩</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

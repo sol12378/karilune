@@ -56,3 +56,31 @@ final advertiserPerformanceProvider = Provider<PastPerformanceStats>((ref) {
   final ads = ref.watch(advertiserAdsProvider);
   return _aggregateStats(ads);
 });
+
+/// 投稿者ダッシュボード用の統計（HTML stats-grid 相当）。
+class AdvertiserDashboardStats {
+  const AdvertiserDashboardStats({
+    required this.activeAdCount,
+    required this.distributorCount,
+    required this.viewCount,
+    required this.leadCount,
+  });
+
+  final int activeAdCount;
+  final int distributorCount;
+  final int viewCount;
+  final int leadCount;
+}
+
+int mockLeadCountForAd(Ad ad) => (ad.viewCount * 0.05).round();
+
+final advertiserDashboardStatsProvider = Provider<AdvertiserDashboardStats>((ref) {
+  final split = ref.watch(advertiserAdsSplitProvider);
+  final activeAds = split.active;
+  return AdvertiserDashboardStats(
+    activeAdCount: activeAds.length,
+    distributorCount: activeAds.fold<int>(0, (s, ad) => s + ad.distributorCount),
+    viewCount: activeAds.fold<int>(0, (s, ad) => s + ad.viewCount),
+    leadCount: activeAds.fold<int>(0, (s, ad) => s + mockLeadCountForAd(ad)),
+  );
+});

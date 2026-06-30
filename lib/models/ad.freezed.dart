@@ -44,6 +44,8 @@ mixin _$Ad {
   bool get wasDistributed => throw _privateConstructorUsedError;
   AdPublicationStatus get publicationStatus =>
       throw _privateConstructorUsedError;
+  String? get reviewNote => throw _privateConstructorUsedError;
+  DateTime? get reviewedAt => throw _privateConstructorUsedError;
 
   /// Create a copy of Ad
   /// with the given fields replaced by the non-null parameter values.
@@ -81,7 +83,9 @@ abstract class $AdCopyWith<$Res> {
       String prefecture,
       bool isAdvertiserAd,
       bool wasDistributed,
-      AdPublicationStatus publicationStatus});
+      AdPublicationStatus publicationStatus,
+      String? reviewNote,
+      DateTime? reviewedAt});
 }
 
 /// @nodoc
@@ -123,6 +127,8 @@ class _$AdCopyWithImpl<$Res, $Val extends Ad> implements $AdCopyWith<$Res> {
     Object? isAdvertiserAd = null,
     Object? wasDistributed = null,
     Object? publicationStatus = null,
+    Object? reviewNote = freezed,
+    Object? reviewedAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -227,6 +233,14 @@ class _$AdCopyWithImpl<$Res, $Val extends Ad> implements $AdCopyWith<$Res> {
           ? _value.publicationStatus
           : publicationStatus // ignore: cast_nullable_to_non_nullable
               as AdPublicationStatus,
+      reviewNote: freezed == reviewNote
+          ? _value.reviewNote
+          : reviewNote // ignore: cast_nullable_to_non_nullable
+              as String?,
+      reviewedAt: freezed == reviewedAt
+          ? _value.reviewedAt
+          : reviewedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ) as $Val);
   }
 }
@@ -262,7 +276,9 @@ abstract class _$$AdImplCopyWith<$Res> implements $AdCopyWith<$Res> {
       String prefecture,
       bool isAdvertiserAd,
       bool wasDistributed,
-      AdPublicationStatus publicationStatus});
+      AdPublicationStatus publicationStatus,
+      String? reviewNote,
+      DateTime? reviewedAt});
 }
 
 /// @nodoc
@@ -301,6 +317,8 @@ class __$$AdImplCopyWithImpl<$Res> extends _$AdCopyWithImpl<$Res, _$AdImpl>
     Object? isAdvertiserAd = null,
     Object? wasDistributed = null,
     Object? publicationStatus = null,
+    Object? reviewNote = freezed,
+    Object? reviewedAt = freezed,
   }) {
     return _then(_$AdImpl(
       id: null == id
@@ -405,6 +423,14 @@ class __$$AdImplCopyWithImpl<$Res> extends _$AdCopyWithImpl<$Res, _$AdImpl>
           ? _value.publicationStatus
           : publicationStatus // ignore: cast_nullable_to_non_nullable
               as AdPublicationStatus,
+      reviewNote: freezed == reviewNote
+          ? _value.reviewNote
+          : reviewNote // ignore: cast_nullable_to_non_nullable
+              as String?,
+      reviewedAt: freezed == reviewedAt
+          ? _value.reviewedAt
+          : reviewedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
     ));
   }
 }
@@ -437,7 +463,9 @@ class _$AdImpl extends _Ad {
       this.prefecture = '愛知県',
       this.isAdvertiserAd = false,
       this.wasDistributed = false,
-      this.publicationStatus = AdPublicationStatus.published})
+      this.publicationStatus = AdPublicationStatus.published,
+      this.reviewNote,
+      this.reviewedAt})
       : super._();
 
   @override
@@ -506,10 +534,14 @@ class _$AdImpl extends _Ad {
   @override
   @JsonKey()
   final AdPublicationStatus publicationStatus;
+  @override
+  final String? reviewNote;
+  @override
+  final DateTime? reviewedAt;
 
   @override
   String toString() {
-    return 'Ad(id: $id, companyName: $companyName, catchCopy: $catchCopy, prText: $prText, thumbnailAssetPath: $thumbnailAssetPath, category: $category, startDate: $startDate, distributionDays: $distributionDays, dailyFee: $dailyFee, hasSpotlightOption: $hasSpotlightOption, hasDistributionRequestNotification: $hasDistributionRequestNotification, hasDistributionSettingNotification: $hasDistributionSettingNotification, distributorCount: $distributorCount, viewCount: $viewCount, isDistributing: $isDistributing, thumbnailUrl: $thumbnailUrl, advertiserCompanyName: $advertiserCompanyName, advertiserUrl: $advertiserUrl, advertiserTel: $advertiserTel, advertiserContact: $advertiserContact, isOwnAd: $isOwnAd, prefecture: $prefecture, isAdvertiserAd: $isAdvertiserAd, wasDistributed: $wasDistributed, publicationStatus: $publicationStatus)';
+    return 'Ad(id: $id, companyName: $companyName, catchCopy: $catchCopy, prText: $prText, thumbnailAssetPath: $thumbnailAssetPath, category: $category, startDate: $startDate, distributionDays: $distributionDays, dailyFee: $dailyFee, hasSpotlightOption: $hasSpotlightOption, hasDistributionRequestNotification: $hasDistributionRequestNotification, hasDistributionSettingNotification: $hasDistributionSettingNotification, distributorCount: $distributorCount, viewCount: $viewCount, isDistributing: $isDistributing, thumbnailUrl: $thumbnailUrl, advertiserCompanyName: $advertiserCompanyName, advertiserUrl: $advertiserUrl, advertiserTel: $advertiserTel, advertiserContact: $advertiserContact, isOwnAd: $isOwnAd, prefecture: $prefecture, isAdvertiserAd: $isAdvertiserAd, wasDistributed: $wasDistributed, publicationStatus: $publicationStatus, reviewNote: $reviewNote, reviewedAt: $reviewedAt)';
   }
 
   @override
@@ -567,7 +599,11 @@ class _$AdImpl extends _Ad {
             (identical(other.wasDistributed, wasDistributed) ||
                 other.wasDistributed == wasDistributed) &&
             (identical(other.publicationStatus, publicationStatus) ||
-                other.publicationStatus == publicationStatus));
+                other.publicationStatus == publicationStatus) &&
+            (identical(other.reviewNote, reviewNote) ||
+                other.reviewNote == reviewNote) &&
+            (identical(other.reviewedAt, reviewedAt) ||
+                other.reviewedAt == reviewedAt));
   }
 
   @override
@@ -597,7 +633,9 @@ class _$AdImpl extends _Ad {
         prefecture,
         isAdvertiserAd,
         wasDistributed,
-        publicationStatus
+        publicationStatus,
+        reviewNote,
+        reviewedAt
       ]);
 
   /// Create a copy of Ad
@@ -635,7 +673,9 @@ abstract class _Ad extends Ad {
       final String prefecture,
       final bool isAdvertiserAd,
       final bool wasDistributed,
-      final AdPublicationStatus publicationStatus}) = _$AdImpl;
+      final AdPublicationStatus publicationStatus,
+      final String? reviewNote,
+      final DateTime? reviewedAt}) = _$AdImpl;
   const _Ad._() : super._();
 
   @override
@@ -688,6 +728,10 @@ abstract class _Ad extends Ad {
   bool get wasDistributed;
   @override
   AdPublicationStatus get publicationStatus;
+  @override
+  String? get reviewNote;
+  @override
+  DateTime? get reviewedAt;
 
   /// Create a copy of Ad
   /// with the given fields replaced by the non-null parameter values.

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>広告配信管理 — 配信者 — カリルネ</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/operator.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-row"><div class="logo-icon">🔥</div>カリルネ</div>
+        <span class="mode-label">広告配信モード</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="distributor.html" class="active"><span class="nav-icon">🏠</span> ホーム</a>
+        <a href="distributor.html#distributing"><span class="nav-icon">📡</span> 配信中</a>
+        <a href="distributor.html#candidates"><span class="nav-icon">🔍</span> 配信候補</a>
+        <a href="distributor-channels.html"><span class="nav-icon">🔗</span> 配信チャネル</a>
+        <a href="distributor.html#history"><span class="nav-icon">📋</span> 配信履歴</a>
+        <a href="#"><span class="nav-icon">🔔</span> 通知</a>
+        <a href="#"><span class="nav-icon">👤</span> アカウント</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="index.html">← ポータルに戻る</a>
+        <div class="org-name">株式会社○○ガス 名古屋支店</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="mobile-nav-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1>広告配信管理</h1>
+        </div>
+        <div class="topbar-actions">
+          <div class="mode-switch">
+            <a href="advertiser.html">投稿</a>
+            <a href="distributor.html" class="active">配信</a>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="preview-banner">
+          <div>
+            <strong>👀 会員にはこう見えています</strong>
+            <p>現在 <strong>8件</strong> の広告を配信中</p>
+          </div>
+          <a href="consumer.html" class="btn btn-primary">会員画面をプレビュー →</a>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">配信中</div>
+            <div class="value">8</div>
+          </div>
+          <div class="stat-card accent">
+            <div class="label">会員参照数</div>
+            <div class="value">2,340</div>
+            <div class="delta">15% 先月比</div>
+          </div>
+          <div class="stat-card green">
+            <div class="label">会員リード数</div>
+            <div class="value">67</div>
+            <div class="delta">9% 先月比</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">登録会員数</div>
+            <div class="value">4,820</div>
+          </div>
+        </div>
+
+        <section class="section" id="distributing">
+          <div class="section-header">
+            <div>
+              <h2>配信中の広告</h2>
+              <p>現在、あなたの会員へ届けている広告</p>
+            </div>
+          </div>
+          <div class="ad-grid">
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-1 thumb-emoji" data-emoji="🥩">
+                <div class="badges">
+                  <span class="badge badge-spotlight">お勧め</span>
+                  <span class="badge badge-active">配信中</span>
+                </div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">名古屋焼肉 炎</div>
+                <div class="catch">週末限定！家族で楽しむ焼肉フェア開催中</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">参照</div><div class="s-val">486</div></div>
+                  <div><div class="s-label">リード</div><div class="s-val">12</div></div>
+                  <div><div class="s-label">保存</div><div class="s-val">34</div></div>
+                  <div><div class="s-label">残り</div><div class="s-val">27日</div></div>
+                </div>
+                <button class="btn btn-distributing" onclick="toggleDist(this)">✓ 配信中 — 停止する</button>
+              </div>
+            </article>
+
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-3 thumb-emoji" data-emoji="🔧">
+                <div class="badges"><span class="badge badge-active">配信中</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">自社 — ガス機器点検</div>
+                <div class="catch">会員様限定・ガス機器安全点検無料</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">参照</div><div class="s-val">1,240</div></div>
+                  <div><div class="s-label">リード</div><div class="s-val">45</div></div>
+                  <div><div class="s-label">保存</div><div class="s-val">89</div></div>
+                  <div><div class="s-label">残り</div><div class="s-val">45日</div></div>
+                </div>
+                <button class="btn btn-distributing" onclick="toggleDist(this)">✓ 配信中 — 停止する</button>
+              </div>
+            </article>
+
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-2 thumb-emoji" data-emoji="🏠">
+                <div class="badges"><span class="badge badge-active">配信中</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">暮らしの雑貨 ひだまり</div>
+                <div class="catch">春の新生活応援セール開催</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">参照</div><div class="s-val">198</div></div>
+                  <div><div class="s-label">リード</div><div class="s-val">5</div></div>
+                  <div><div class="s-label">保存</div><div class="s-val">22</div></div>
+                  <div><div class="s-label">残り</div><div class="s-val">13日</div></div>
+                </div>
+                <button class="btn btn-distributing" onclick="toggleDist(this)">✓ 配信中 — 停止する</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="candidates">
+          <div class="section-header">
+            <div>
+              <h2>配信候補・お勧め</h2>
+              <p>カタログから選んで、会員へ配信を開始</p>
+            </div>
+          </div>
+          <div class="filter-bar">
+            <span class="chip active">すべて</span>
+            <span class="chip">飲食店</span>
+            <span class="chip">生活雑貨</span>
+            <span class="chip">美容・健康</span>
+            <span class="chip">お勧め候補</span>
+          </div>
+          <div class="ad-grid">
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-4 thumb-emoji" data-emoji="💇">
+                <div class="badges"><span class="badge badge-spotlight">お勧め</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">ヘアサロン Bloom</div>
+                <div class="catch">新規限定カット＋トリートメント 30%OFF</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">開始</div><div class="s-val">3/1</div></div>
+                  <div><div class="s-label">終了</div><div class="s-val">3/31</div></div>
+                  <div><div class="s-label">他社</div><div class="s-val">6社</div></div>
+                  <div><div class="s-label">参照</div><div class="s-val">890</div></div>
+                </div>
+                <button class="btn btn-distribute" onclick="startDist(this)">配信する</button>
+              </div>
+            </article>
+
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-5 thumb-emoji" data-emoji="🍰">
+              </div>
+              <div class="op-ad-body">
+                <div class="company">パティスリー ルミエール</div>
+                <div class="catch">ホワイトデー限定ケーキ予約受付中</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">開始</div><div class="s-val">3/5</div></div>
+                  <div><div class="s-label">終了</div><div class="s-val">3/14</div></div>
+                  <div><div class="s-label">他社</div><div class="s-val">3社</div></div>
+                  <div><div class="s-label">参照</div><div class="s-val">420</div></div>
+                </div>
+                <button class="btn btn-distribute" onclick="startDist(this)">配信する</button>
+              </div>
+            </article>
+
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-6 thumb-emoji" data-emoji="🏋️" style="background:linear-gradient(145deg,#1a5c32,#27ae60,#58d68d)">
+                <div class="badges"><span class="badge badge-spotlight">お勧め</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">フィットネスジム アクティブ</div>
+                <div class="catch">春の入会キャンペーン 初月無料</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">開始</div><div class="s-val">3/1</div></div>
+                  <div><div class="s-label">終了</div><div class="s-val">4/30</div></div>
+                  <div><div class="s-label">他社</div><div class="s-val">9社</div></div>
+                  <div><div class="s-label">参照</div><div class="s-val">1,120</div></div>
+                </div>
+                <button class="btn btn-distribute" onclick="startDist(this)">配信する</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="history">
+          <div class="section-header">
+            <div>
+              <h2>配信履歴</h2>
+              <p>過去に配信した広告</p>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>広告名</th>
+                <th>配信期間</th>
+                <th>参照数</th>
+                <th>リード</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>冬の暖房器具フェア</td>
+                <td>2025/12/1 — 2026/2/28</td>
+                <td>3,450</td>
+                <td>78</td>
+                <td><span class="badge badge-ended">終了</span></td>
+              </tr>
+              <tr>
+                <td>年末大掃除キャンペーン</td>
+                <td>2025/11/15 — 2026/1/15</td>
+                <td>2,180</td>
+                <td>34</td>
+                <td><span class="badge badge-ended">終了</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script>
+    function startDist(btn) {
+      btn.className = 'btn btn-distributing';
+      btn.textContent = '✓ 配信中 — 停止する';
+      btn.onclick = () => toggleDist(btn);
+    }
+    function toggleDist(btn) {
+      if (btn.classList.contains('btn-distributing')) {
+        btn.className = 'btn btn-distribute';
+        btn.textContent = '配信する';
+        btn.onclick = () => startDist(btn);
+      }
+    }
+    document.querySelectorAll('.chip').forEach(c => {
+      c.addEventListener('click', () => {
+        c.closest('.filter-bar').querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -3,13 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'data/ad_repository.dart';
+import 'models/ad_publication_status.dart';
 import 'providers/ad_form_provider.dart';
+import 'providers/ad_list_provider.dart';
 import 'providers/account_provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/account/account_page.dart';
 import 'screens/ad_detail/ad_detail_page.dart';
 import 'screens/ad_post/ad_post_completion_page.dart';
 import 'screens/ad_post/ad_post_page.dart';
+import 'screens/admin/admin_ads_page.dart';
 import 'screens/admin/admin_dashboard_page.dart';
 import 'screens/admin/featured_placements_page.dart';
 import 'screens/advertiser/advertiser_history_page.dart';
@@ -68,6 +71,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin/dashboard',
         builder: (context, state) => const AdminDashboardPage(),
+      ),
+      GoRoute(
+        path: '/admin/ads',
+        builder: (context, state) {
+          final status = state.uri.queryParameters['status'];
+          return _AdminAdsRouteWrapper(initialStatus: status);
+        },
       ),
       GoRoute(
         path: '/admin/featured-placements',
@@ -215,6 +225,50 @@ class _AdPostRouteWrapperState extends ConsumerState<_AdPostRouteWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    final form = ref.watch(adFormProvider);
+    if (widget.isEdit && widget.adId != null) {
+      if (form.editingAdId != widget.adId) {
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
+    }
     return AdPostPage(adId: widget.adId);
+  }
+}
+
+class _AdminAdsRouteWrapper extends ConsumerStatefulWidget {
+  const _AdminAdsRouteWrapper({this.initialStatus});
+
+  final String? initialStatus;
+
+  @override
+  ConsumerState<_AdminAdsRouteWrapper> createState() =>
+      _AdminAdsRouteWrapperState();
+}
+
+class _AdminAdsRouteWrapperState extends ConsumerState<_AdminAdsRouteWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final status = widget.initialStatus;
+      if (status == null) return;
+      AdPublicationStatus? filter;
+      for (final s in AdPublicationStatus.values) {
+        if (s.name == status) {
+          filter = s;
+          break;
+        }
+      }
+      if (filter != null) {
+        ref.read(adminAdsStatusFilterProvider.notifier).state = filter;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const AdminAdsPage();
   }
 }

@@ -2,55 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../data/ad_repository.dart';
 import '../../models/ad.dart';
 import '../../providers/ad_list_provider.dart';
 import '../../providers/operator_stats_provider.dart';
 import '../../theme/breakpoints.dart';
-import '../../widgets/ad_card_distributor.dart';
-import '../../widgets/ad_grid.dart';
-import '../../widgets/ad_grid_skeleton.dart';
+import '../../widgets/ad_card_distributor_visual.dart';
+import '../../widgets/distributor_visual_grid.dart';
+import '../../widgets/distributor_visual_grid_skeleton.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/common/section_header.dart';
 import '../../widgets/demo_async_wrapper.dart';
-import '../../widgets/distributor_sort_chips.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/member_filter_bar.dart';
-import '../../widgets/operator/operator_home_layout.dart';
+import '../../widgets/operator/distributor_browse_layout.dart';
 import '../../widgets/operator/operator_mode.dart';
 import '../../widgets/operator/operator_shell.dart';
-
-Future<void> confirmToggleDistributing(
-  BuildContext context,
-  WidgetRef ref,
-  Ad ad,
-) async {
-  final isStop = ad.isDistributing;
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(isStop ? '配信停止の確認' : '配信開始の確認'),
-      content: Text(
-        isStop
-            ? '「${ad.companyName}」の配信を停止しますか？'
-            : '「${ad.companyName}」を配信しますか？',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('キャンセル'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: Text(isStop ? '停止する' : '配信する'),
-        ),
-      ],
-    ),
-  );
-  if (confirmed == true) {
-    ref.read(adRepositoryProvider.notifier).toggleDistributing(ad.id);
-  }
-}
+import '../distributor/distributor_actions.dart' show confirmToggleDistributing;
 
 class HomeDistributorPage extends ConsumerWidget {
   const HomeDistributorPage({super.key});
@@ -69,25 +36,17 @@ class HomeDistributorPage extends ConsumerWidget {
 
           return Stack(
             children: [
-              OperatorHomeLayout(
-                showRecommended: false,
-                showPrefectureFilter: true,
+              DistributorBrowseLayout(
                 statsProvider: distributorPerformanceProvider,
-                mainHeader: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SectionHeader(
-                      title: '配信候補の広告',
-                      subtitle: '並び替え・フィルタで探して配信ON',
-                    ),
-                    DistributorSortChips(),
-                  ],
-                ),
+                onPickupDistribute: (adId) {
+                  final ad = ref.read(adByIdProvider(adId));
+                  if (ad != null) {
+                    confirmToggleDistributing(context, ref, ad);
+                  }
+                },
                 buildMain: (width) => DemoAsyncWrapper(
                   cacheKey: 'distributor-home-grid',
-                  loading: AdGridSkeleton(
-                    crossAxisCount: width >= Breakpoints.desktop ? 3 : 2,
-                  ),
+                  loading: const DistributorVisualGridSkeleton(),
                   builder: () => DistributorAdsGrid(
                     width: width,
                     bottomPadding: showFilterBar ? 80 : 24,
@@ -161,7 +120,7 @@ class DistributorAdsGrid extends ConsumerWidget {
   }
 
   Widget _buildGrid(BuildContext context, WidgetRef ref, List<Ad> ads) {
-    return AdGridView.builder(
+    return DistributorVisualGridView.builder(
       width: width,
       shrinkWrap: true,
       padding: const EdgeInsets.only(bottom: 8),
@@ -170,7 +129,7 @@ class DistributorAdsGrid extends ConsumerWidget {
         final ad = ads[index];
         return RepaintBoundary(
           key: ValueKey(ad.id),
-          child: AdCardDistributor(
+          child: AdCardDistributorVisual(
             ad: ad,
             onTap: () => context.push(
               '/ads/${ad.id}?from=distributor',

@@ -2,9 +2,10 @@
 ///
 /// | 画面 | Shell | Layout | 注目/お勧め | カテゴリ | 実績 | カード |
 /// |------|-------|--------|------------|---------|------|--------|
-/// | 会員 | AppShell | MemberHomeLayout | FeaturedAdsCarousel | Sidebar | なし | AdCardConsumer |
-/// | 配信 | OperatorShell | OperatorHomeLayout | グリッド内バッジ | Sidebar+地域 | あり | AdCardDistributor |
-/// | 投稿 | OperatorShell | OperatorHomeLayout | なし | なし | あり | AdCardAdvertiser |
+/// | 会員スマホ | AppShell | ConsumerFeedLayout | FeaturedAdsCarousel | フィルタバー | なし | FeedAdCard |
+/// | 会員PC | AppShell | MemberHomeLayout + FeedAdCard 2列 | FeaturedAdsCarousel | Sidebar | なし | FeedAdCard |
+/// | 配信 | OperatorShell | DistributorBrowseLayout | FeaturedAdsCarousel | Sidebar+地域 | あり | AdCardDistributorVisual |
+/// | 投稿 | OperatorShell | AdvertiserDashboardLayout | なし | なし | StatsGrid | AdCardAdvertiser |
 ///
 /// §3.2 ワイヤーフレームはオペレーター（配信/投稿）向け。
 /// 会員画面 `/member/*` は仕様書に明示がなく、閲覧ブロックのみをデモ拡張として提供する。

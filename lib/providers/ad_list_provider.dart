@@ -1,8 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/ad_repository.dart';
+import '../data/ad_report_repository.dart';
+import '../data/audit_log_repository.dart';
 import '../data/featured_placement_repository.dart';
 import '../models/ad.dart';
+import '../models/ad_publication_status.dart';
 import '../models/featured_placement.dart';
 import '../services/featured_carousel_resolver.dart';
 
@@ -246,16 +249,8 @@ final spotlightAdsProvider = Provider<List<Ad>>((ref) {
 });
 
 final distributorSpotlightAdsProvider = Provider<List<Ad>>((ref) {
-  final placements = ref
-      .watch(featuredPlacementRepositoryProvider)
-      .where(
-        (p) => p.placementKey == FeaturedPlacementKeys.distributorHomeSpotlight,
-      )
-      .toList();
-  return FeaturedCarouselResolver.resolve(
-    placements: placements,
-    catalog: ref.watch(activeDistributingAdsProvider),
-  );
+  // 会員ホームと同一の注目カルーセル実装・掲載枠を共有
+  return ref.watch(spotlightAdsProvider);
 });
 
 final endedAdvertiserAdsProvider = Provider<List<Ad>>((ref) {
@@ -279,4 +274,200 @@ final distributorHistoryAdsProvider = Provider<List<Ad>>((ref) {
       .watch(adListProvider)
       .where((ad) => ad.wasDistributed && (ad.isEnded || !ad.isDistributing))
       .toList();
+});
+
+/// この配信者が過去に配信したことのある制作元（advertiserCompanyName）の集合。
+Set<String> pastAdvertiserNamesFrom(List<Ad> ads) {
+  return ads
+      .where((ad) => ad.wasDistributed)
+      .map((ad) => ad.advertiserCompanyName)
+      .toSet();
+}
+
+/// かつて配信した制作元の新作・再配信候補（未配信の公開広告）。
+List<Ad> filterPastAdvertiserPickup({
+  required List<Ad> allAds,
+  required List<Ad> categoryFiltered,
+}) {
+  final pastAdvertisers = pastAdvertiserNamesFrom(allAds);
+  if (pastAdvertisers.isEmpty) return const [];
+
+  return categoryFiltered.where((ad) {
+    return pastAdvertisers.contains(ad.advertiserCompanyName) &&
+        !ad.isOwnAd &&
+        !ad.isDistributing &&
+        ad.isVisibleToCatalog &&
+        !ad.isEnded;
+  }).toList();
+}
+
+final distributorPastAdvertiserPickupProvider = Provider<List<Ad>>((ref) {
+  final all = ref.watch(adListProvider);
+  final filtered = ref.watch(categoryPrefectureFilteredAdsProvider);
+  final sortOrder = ref.watch(distributorSortOrderProvider);
+
+  return applySort(
+    filterPastAdvertiserPickup(allAds: all, categoryFiltered: filtered),
+    sortOrder,
+  );
+});
+
+/// 運営ダッシュボード用の集計。
+class AdminDashboardStats {
+  const AdminDashboardStats({
+    required this.totalAds,
+    required this.distributingAds,
+    required this.memberVisibleAds,
+    required this.pendingReviewAds,
+    required this.draftAds,
+    required this.totalViews,
+    required this.advertiserCount,
+    required this.pendingReports,
+    required this.zeroDistributionAds,
+    required this.rejectedAds,
+    required this.recentActivities,
+  });
+
+  final int totalAds;
+  final int distributingAds;
+  final int memberVisibleAds;
+  final int pendingReviewAds;
+  final int draftAds;
+  final int totalViews;
+  final int advertiserCount;
+  final int pendingReports;
+  final int zeroDistributionAds;
+  final int rejectedAds;
+  final List<String> recentActivities;
+}
+
+final adminDashboardStatsProvider = Provider<AdminDashboardStats>((ref) {
+  final all = ref.watch(adListProvider);
+  final split = ref.watch(advertiserAdsSplitProvider);
+  final reports = ref.watch(adReportRepositoryProvider);
+  final auditLogs = ref.watch(auditLogRepositoryProvider);
+
+  final distributing =
+      all.where((ad) => ad.isDistributing && ad.isActive).length;
+  final memberVisible = all
+      .where(
+        (ad) =>
+            ad.isDistributing &&
+            ad.isActive &&
+            ad.isVisibleToCatalog,
+      )
+      .length;
+  final totalViews = all.fold<int>(0, (sum, ad) => sum + ad.viewCount);
+  final zeroDistribution = all
+      .where(
+        (ad) =>
+            ad.isVisibleToCatalog &&
+            ad.isActive &&
+            !ad.isDistributing,
+      )
+      .length;
+
+  final activities = auditLogs.take(10).map((e) {
+    final time = '${e.timestamp.hour.toString().padLeft(2, '0')}:'
+        '${e.timestamp.minute.toString().padLeft(2, '0')}';
+    return '[$time] ${e.actor}: ${e.summary}';
+  }).toList();
+  if (activities.isEmpty) {
+    activities.add('現在、表示する活動はありません');
+  }
+
+  return AdminDashboardStats(
+    totalAds: all.length,
+    distributingAds: distributing,
+    memberVisibleAds: memberVisible,
+    pendingReviewAds: split.pending.length,
+    draftAds: split.drafts.length,
+    totalViews: totalViews,
+    advertiserCount: split.all.length,
+    pendingReports: reports.length,
+    zeroDistributionAds: zeroDistribution,
+    rejectedAds: split.rejected.length,
+    recentActivities: activities,
+  );
+});
+
+final adminAdsSearchProvider = StateProvider<String>((ref) => '');
+
+final adminAdsStatusFilterProvider =
+    StateProvider<AdPublicationStatus?>((ref) => null);
+
+final adminAdsProvider = Provider<List<Ad>>((ref) {
+  final all = ref.watch(adListProvider);
+  final query = ref.watch(adminAdsSearchProvider).trim().toLowerCase();
+  final status = ref.watch(adminAdsStatusFilterProvider);
+
+  return all.where((ad) {
+    if (status != null && ad.publicationStatus != status) return false;
+    if (query.isEmpty) return true;
+    return ad.companyName.toLowerCase().contains(query) ||
+        ad.catchCopy.toLowerCase().contains(query);
+  }).toList();
+});
+
+class DistributorTodayTasks {
+  const DistributorTodayTasks({
+    required this.newlyPublished,
+    required this.endingSoon,
+    required this.spotlightNotDistributed,
+  });
+
+  final List<Ad> newlyPublished;
+  final List<Ad> endingSoon;
+  final List<Ad> spotlightNotDistributed;
+
+  bool get isEmpty =>
+      newlyPublished.isEmpty &&
+      endingSoon.isEmpty &&
+      spotlightNotDistributed.isEmpty;
+}
+
+final distributorTodayTasksProvider = Provider<DistributorTodayTasks>((ref) {
+  final all = ref.watch(categoryPrefectureFilteredAdsProvider);
+  final now = DateTime.now();
+  final sevenDaysAgo = now.subtract(const Duration(days: 7));
+  final threeDaysLater = now.add(const Duration(days: 3));
+
+  final newlyPublished = all
+      .where(
+        (ad) =>
+            !ad.isDistributing &&
+            ad.isVisibleToCatalog &&
+            !ad.isEnded &&
+            !ad.startDate.isBefore(sevenDaysAgo),
+      )
+      .take(3)
+      .toList();
+
+  final endingSoon = all
+      .where(
+        (ad) =>
+            ad.isVisibleToCatalog &&
+            !ad.isEnded &&
+            ad.endDate.isBefore(threeDaysLater) &&
+            !ad.endDate.isBefore(now),
+      )
+      .take(3)
+      .toList();
+
+  final spotlightNotDistributed = all
+      .where(
+        (ad) =>
+            ad.hasSpotlightOption &&
+            !ad.isDistributing &&
+            ad.isVisibleToCatalog &&
+            !ad.isEnded,
+      )
+      .take(3)
+      .toList();
+
+  return DistributorTodayTasks(
+    newlyPublished: newlyPublished,
+    endingSoon: endingSoon,
+    spotlightNotDistributed: spotlightNotDistributed,
+  );
 });

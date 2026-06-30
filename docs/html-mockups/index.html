@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>カリルネ — あるべき姿モック</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+  <div class="portal">
+    <header class="portal-header">
+      <div class="logo">
+        <div class="logo-icon">🔥</div>
+        <div class="logo-text">カリ<span>ルネ</span></div>
+      </div>
+      <p class="tagline">地域共創プラットフォーム — 3つの立場のあるべき姿を体験できます</p>
+      <div class="portal-ecosystem" aria-label="エコシステムの流れ">
+        <div class="eco-node">作成元<small>広告を作る</small></div>
+        <div class="eco-arrow" aria-hidden="true">→</div>
+        <div class="eco-node">配信者<small>選んで届ける</small></div>
+        <div class="eco-arrow" aria-hidden="true">→</div>
+        <div class="eco-node">消費者<small>信頼して行動する</small></div>
+        <div class="eco-arrow" aria-hidden="true">↻</div>
+      </div>
+    </header>
+
+    <div class="portal-notice" role="note">
+      <strong>⚠️ ファイルを直接開くとエラーになる場合があります</strong>
+      <ul class="notice-steps">
+        <li>ターミナルで <code>docs/html-mockups</code> に移動</li>
+        <li><code>bash serve.sh</code> を実行</li>
+        <li>ブラウザで <code>http://localhost:8765</code> を開く</li>
+      </ul>
+    </div>
+
+    <div class="role-cards">
+      <article class="role-card creator">
+        <div class="card-icon" aria-hidden="true">✏️</div>
+        <div class="role-label">Advertiser</div>
+        <h2>作成元（広告主）</h2>
+        <p class="subtitle">お店・メーカー — 広告を作成し、配信効果を測定する</p>
+        <ul>
+          <li>AI支援による低コスト広告作成</li>
+          <li>下書き → 審査 → 公開のワークフロー</li>
+          <li>配信者数・参照数・リード数の効果レポート</li>
+          <li>料金・オプション管理</li>
+        </ul>
+        <a href="advertiser.html" class="card-btn">作成元の画面を見る →</a>
+      </article>
+
+      <article class="role-card distributor">
+        <div class="card-icon" aria-hidden="true">📡</div>
+        <div class="role-label">Distributor</div>
+        <h2>配信者（ガス会社等）</h2>
+        <p class="subtitle">生活インフラ — カタログから選び、会員へ届ける</p>
+        <ul>
+          <li>公開カタログから配信する広告を選択</li>
+          <li><strong>かつて配信した制作元の新作ピックアップ</strong></li>
+          <li>「お勧め」ピックアップで推薦を明示</li>
+          <li>HP・チラシQR・アプリから会員へ配信</li>
+          <li>配信実績・会員の反応を確認</li>
+        </ul>
+        <a href="distributor-pick.html" class="card-btn">配信者の画面を見る →</a>
+      </article>
+
+      <article class="role-card consumer">
+        <div class="card-icon" aria-hidden="true">📱</div>
+        <div class="role-label">Member</div>
+        <h2>消費者（会員）</h2>
+        <p class="subtitle">一般住民 — 顔の見える配信元から情報を受け取る</p>
+        <ul>
+          <li>画像主体の縦フィード（カード型）</li>
+          <li>「○○ガスからのおすすめ」の信頼シグナル</li>
+          <li>検索・フィルタなしのパッシブ発見</li>
+          <li>電話・来店・申込へのリード導線</li>
+        </ul>
+        <a href="consumer.html" class="card-btn">消費者の画面を見る →</a>
+      </article>
+    </div>
+
+    <footer class="portal-footer">
+      カリルネ HTMLモック — 現行Flutter実装との差分を表現した理想UI<br>
+      各画面は相互にリンクしています
+    </footer>
+  </div>
+</body>
+</html>

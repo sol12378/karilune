@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>広告詳細 — 配信者 — カリルネ</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/operator.css">
+</head>
+<body class="dist-detail-page">
+
+  <div class="mock-link-bar">
+    <a href="distributor-pick.html">← 配信判断</a> ·
+    <a href="index.html">ポータル</a>
+  </div>
+
+  <div class="dist-detail-app">
+    <header class="dist-detail-appbar">
+      <button class="back-btn" onclick="history.back()" aria-label="戻る">←</button>
+      <h1>広告詳細</h1>
+    </header>
+
+    <div class="dist-detail-hero thumb-1" id="hero">
+      <span id="emoji" aria-hidden="true">🥩</span>
+    </div>
+
+    <div class="dist-detail-body">
+      <div class="dist-detail-card">
+        <h2 id="title">週末限定！家族で楽しむ焼肉フェア</h2>
+        <div class="company" id="company">名古屋焼肉 炎</div>
+        <p id="pr">国産黒毛和牛を使用した特選コースが今週末限定でお得です。ご家族でのお食事、会社宴会にも最適。</p>
+      </div>
+
+      <div class="dist-detail-card">
+        <h3>配信情報</h3>
+        <div class="dist-info-row"><span class="label">配信開始日</span><span class="value" id="start">2026/03/01</span></div>
+        <div class="dist-info-row"><span class="label">配信終了日</span><span class="value" id="end">2026/03/31</span></div>
+        <div class="dist-info-row"><span class="label">配信日数</span><span class="value" id="days">30日</span></div>
+        <div class="dist-info-row"><span class="label">カテゴリー</span><span class="value" id="category">飲食店</span></div>
+        <div class="dist-info-row"><span class="label">広告料金</span><span class="value" id="fee">¥45,000</span></div>
+      </div>
+
+      <div class="dist-detail-card">
+        <h3>投稿者情報</h3>
+        <div class="dist-info-row"><span class="label">会社名</span><span class="value" id="advertiser">名古屋焼肉 炎 株式会社</span></div>
+        <div class="dist-info-row"><span class="label">TEL</span><span class="value" id="tel">052-111-2222</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dist-detail-bottom">
+    <button class="btn-distribute-full primary" id="distBtn" onclick="toggleDistribute()">配信する</button>
+  </div>
+
+  <script>
+    const ads = {
+      '1': { emoji: '📚', bg: 'thumb-4', title: '春期講習・無料体験授業受付中', company: 'スタディラボ進学塾', pr: '春休み特別講習と無料体験授業を実施中。個別指導で弱点克服をサポートします。', category: '教育・スクール', distributing: true },
+      '3': { emoji: '🏠', bg: 'thumb-3', title: '春の新生活応援セール開催', company: '暮らしの雑貨 ひだまり', pr: 'キッチン用品から収納グッズまで最大30%OFF。', category: '生活雑貨', distributing: true },
+      '4': { emoji: '🔧', bg: 'thumb-4', title: '水漏れ・鍵のトラブル即日対応', company: 'すぐ駆けつけ修理 24', pr: '水漏れ・鍵のトラブルに即日対応。会員様限定の優待料金あり。', category: '生活トラブル・修理', distributing: false },
+      '5': { emoji: '💇', bg: 'thumb-5', title: '新規限定カット＋トリートメント 30%OFF', company: 'ヘアサロン Bloom', pr: '初回来店の方限定。カット＋トリートメントがお得。', category: '美容・健康', distributing: false },
+      '7': { emoji: '💆', bg: 'thumb-2', title: '初回限定フェイシャル50%OFF', company: '癒サロン株式会社', pr: '梅雨前のボディケアキャンペーン実施中。', category: '美容・健康', distributing: false },
+      '12': { emoji: '🥩', bg: 'thumb-1', title: '週末限定！家族で楽しむ焼肉フェア', company: '名古屋焼肉 炎', pr: '国産黒毛和牛を使用した特選コースが今週末限定でお得です。', category: '飲食店', distributing: true },
+      'lottery': { emoji: '🎰', bg: '', title: '大抽選会', company: '○○ショッピングモール', pr: '豪華賞品が当たる大抽選会を開催。', category: 'イベント', distributing: false },
+      'ref-1': { emoji: '🥩', bg: 'thumb-1', title: 'キッチンリフォーム相談会 予約受付中', company: '株式会社匠リフォーム', pr: 'キッチンリフォームの無料相談会を開催。', category: 'リフォーム', distributing: false },
+      'ref-2': { emoji: '☕', bg: 'thumb-2', title: '春の新作ドリンクフェア開催', company: 'カフェドナゴヤ株式会社', pr: '季節限定ドリンクをご用意。', category: '飲食店', distributing: false },
+      'ref-3': { emoji: '🍞', bg: 'thumb-3', title: '新商品パン試食会のお知らせ', company: '麦の香ベーカリー', pr: '新作パンの試食会を土日開催。', category: '飲食店', distributing: false },
+      'ref-4': { emoji: '💆', bg: 'thumb-4', title: '梅雨前ボディケアキャンペーン', company: '癒サロン株式会社', pr: 'ボディケアコースが期間限定価格。', category: '美容・健康', distributing: false }
+    };
+
+    const id = new URLSearchParams(location.search).get('id') || '12';
+    const ad = ads[id] || ads['12'];
+    const hero = document.getElementById('hero');
+    hero.className = 'dist-detail-hero ' + (ad.bg || '');
+    if (!ad.bg) hero.style.background = 'linear-gradient(135deg,#1565C0,#42A5F5)';
+    document.getElementById('emoji').textContent = ad.emoji;
+    document.getElementById('title').textContent = ad.title;
+    document.getElementById('company').textContent = ad.company;
+    document.getElementById('pr').textContent = ad.pr;
+    document.getElementById('category').textContent = ad.category;
+    document.getElementById('advertiser').textContent = ad.company + ' 株式会社';
+
+    const btn = document.getElementById('distBtn');
+    function renderBtn(distributing) {
+      btn.textContent = distributing ? '配信停止' : '配信する';
+      btn.className = 'btn-distribute-full ' + (distributing ? 'distributing' : 'primary');
+    }
+    renderBtn(ad.distributing);
+
+    function toggleDistribute() {
+      const distributing = btn.classList.contains('distributing');
+      if (distributing) {
+        if (!confirm('配信を停止しますか？（デモ）')) return;
+        renderBtn(false);
+      } else {
+        if (!confirm('この広告を会員へ配信しますか？（デモ）')) return;
+        renderBtn(true);
+      }
+    }
+  </script>
+</body>
+</html>

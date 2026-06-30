@@ -32,6 +32,8 @@ class Ad with _$Ad {
     @Default(false) bool isAdvertiserAd,
     @Default(false) bool wasDistributed,
     @Default(AdPublicationStatus.published) AdPublicationStatus publicationStatus,
+    String? reviewNote,
+    DateTime? reviewedAt,
   }) = _Ad;
 
   const Ad._();

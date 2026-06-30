@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../data/ad_repository.dart';
 import '../../providers/ad_list_provider.dart';
 import '../../providers/favorites_provider.dart';
-import '../../widgets/ad_card_distributor.dart';
-import '../../widgets/ad_grid.dart';
+import '../../widgets/ad_card_distributor_visual.dart';
+import '../../widgets/distributor_visual_grid.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/operator/operator_mode.dart';
 import '../../widgets/operator/operator_shell.dart';
+import 'distributor_actions.dart';
 
 class DistributorFavoritesPage extends ConsumerWidget {
   const DistributorFavoritesPage({super.key});
@@ -34,16 +34,26 @@ class DistributorFavoritesPage extends ConsumerWidget {
               title: 'お気に入りはまだありません',
               description: '配信候補の広告をお気に入りに追加できます。',
             )
-          : AdGridView.builder(
-              itemCount: ads.length,
-              itemBuilder: (context, index) {
-                final ad = ads[index];
-                return AdCardDistributor(
-                  ad: ad,
-                  onTap: () => context.push('/ads/${ad.id}?from=distributor'),
-                  onToggleDistribute: () => ref
-                      .read(adRepositoryProvider.notifier)
-                      .toggleDistributing(ad.id),
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                return DistributorVisualGridView.builder(
+                  width: constraints.maxWidth,
+                  itemCount: ads.length,
+                  itemBuilder: (context, index) {
+                    final ad = ads[index];
+                    return AdCardDistributorVisual(
+                      ad: ad,
+                      onTap: () =>
+                          context.push('/ads/${ad.id}?from=distributor'),
+                      onToggleDistribute: ad.isEnded
+                          ? null
+                          : () => confirmToggleDistributing(
+                                context,
+                                ref,
+                                ad,
+                              ),
+                    );
+                  },
                 );
               },
             ),

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配信判断画面 — 配信者 — カリルネ（実装図）</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/operator.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-row"><div class="logo-icon">🔥</div>カリルネ</div>
+        <span class="mode-label">広告配信モード</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="distributor-pick.html" class="active"><span class="nav-icon">🏠</span> ホーム</a>
+        <a href="#"><span class="nav-icon">♡</span> お気に入り</a>
+        <a href="distributor.html#history"><span class="nav-icon">📋</span> 配信履歴</a>
+        <a href="distributor-channels.html"><span class="nav-icon">🔗</span> 配信チャネル</a>
+        <a href="#"><span class="nav-icon">🔔</span> 通知</a>
+        <a href="#"><span class="nav-icon">👤</span> アカウント</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="index.html">← ポータル</a>
+        <div class="org-name">株式会社○○ガス 名古屋支店</div>
+      </div>
+    </aside>
+
+    <main class="main-content distributor-browse">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="mobile-nav-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1>配信判断</h1>
+        </div>
+        <div class="topbar-actions">
+          <div class="mode-switch">
+            <a href="advertiser.html">投稿</a>
+            <a href="distributor-pick.html" class="active">配信</a>
+          </div>
+          <a href="consumer.html" class="btn btn-outline btn-sm">会員プレビュー</a>
+        </div>
+      </header>
+
+      <div class="page-body" style="padding-top:0">
+
+        <!-- 実装の役割説明 -->
+        <div class="flow-diagram" style="margin:16px 16px 0">
+          <strong>この画面の役割</strong> — 公開された広告カタログを見て、自社会員へ<strong>新規配信するかどうか</strong>を決める。
+          <div class="flow-steps">
+            <span class="flow-step">① 注目・制作元ピックアップで発見</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">② 画像タップで詳細確認</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">③ カテゴリで絞り込み</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">④ 配信する / 停止</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-step">⑤ 会員フィードに表示</span>
+          </div>
+        </div>
+
+        <!-- ① 注目の広告（既存 FeaturedAdsCarousel） -->
+        <div class="browse-section-title">
+          <h2>注目の広告</h2>
+          <p>オプション設定の広告をピックアップ</p>
+        </div>
+        <div class="featured-carousel-wrap">
+          <button class="carousel-nav prev" onclick="scrollCarousel(-1)" aria-label="前へ">‹</button>
+          <div class="featured-carousel" id="featuredCarousel">
+            <article class="featured-card">
+              <a href="distributor-detail.html?id=1" class="fc-image-link">
+                <div class="fc-image thumb-4" style="background:linear-gradient(135deg,#1565C0,#42A5F5)">
+                  <span class="fc-badge">注目</span>
+                  Ad 01
+                </div>
+              </a>
+              <div class="fc-body">
+                <div class="fc-company">スタディラボ進学塾</div>
+                <div class="fc-catch">春期講習・無料体験授業受付中</div>
+                <div class="fc-meta">
+                  <span>🏷 教育・スクール</span>
+                  <span>📍 三重県</span>
+                  <span>📅 残り29日</span>
+                </div>
+                <div class="fc-link"><a href="distributor-detail.html?id=1">詳細を見る →</a></div>
+              </div>
+            </article>
+            <article class="featured-card">
+              <a href="distributor-detail.html?id=7" class="fc-image-link">
+                <div class="fc-image" style="background:linear-gradient(135deg,#1565C0,#42A5F5)">
+                  <span class="fc-badge">注目</span>
+                  Ad 07
+                </div>
+              </a>
+              <div class="fc-body">
+                <div class="fc-company">癒サロン株式会社</div>
+                <div class="fc-catch">初回限定フェイシャル50%OFF</div>
+                <div class="fc-meta">
+                  <span>🏷 美容・健康</span>
+                  <span>📍 愛知県</span>
+                  <span>📅 残り21日</span>
+                </div>
+                <div class="fc-link"><a href="distributor-detail.html?id=7">詳細を見る →</a></div>
+              </div>
+            </article>
+            <article class="featured-card">
+              <a href="distributor-detail.html?id=12" class="fc-image-link">
+                <div class="fc-image" style="background:linear-gradient(135deg,#1565C0,#42A5F5)">
+                  <span class="fc-badge">注目</span>
+                  Ad 12
+                </div>
+              </a>
+              <div class="fc-body">
+                <div class="fc-company">名古屋焼肉 炎</div>
+                <div class="fc-catch">週末限定！家族で楽しむ焼肉フェア</div>
+                <div class="fc-meta">
+                  <span>🏷 飲食店</span>
+                  <span>📍 愛知県</span>
+                  <span>📅 残り27日</span>
+                </div>
+                <div class="fc-link"><a href="distributor-detail.html?id=12">詳細を見る →</a></div>
+              </div>
+            </article>
+          </div>
+          <button class="carousel-nav next" onclick="scrollCarousel(1)" aria-label="次へ">›</button>
+          <div class="carousel-dots"><span class="active"></span><span></span><span></span></div>
+        </div>
+
+        <!-- ② 【新機能】かつて配信した制作元の広告 -->
+        <section class="pickup-section" aria-label="制作元ピックアップ">
+          <div class="browse-section-title">
+            <h2>かつて配信した制作元の広告</h2>
+            <p>過去に配信実績のある広告主の新作。ワンタップで配信を検討できます</p>
+          </div>
+          <div class="pickup-visual-scroll">
+            <article class="visual-ad-card">
+              <a href="distributor-detail.html?id=ref-1" class="va-image va-image-link thumb-1">🥩<span class="va-badge">制作元</span><span class="va-detail-hint">詳細を見る</span></a>
+              <div class="va-caption"><a href="distributor-detail.html?id=ref-1">キッチンリフォーム相談会 予約受付中</a></div>
+              <button class="va-status not-distributing" onclick="toggleStatus(this)">未配信</button>
+            </article>
+            <article class="visual-ad-card">
+              <a href="distributor-detail.html?id=ref-2" class="va-image va-image-link thumb-2">☕<span class="va-badge">制作元</span><span class="va-detail-hint">詳細を見る</span></a>
+              <div class="va-caption"><a href="distributor-detail.html?id=ref-2">春の新作ドリンクフェア開催</a></div>
+              <button class="va-status not-distributing" onclick="toggleStatus(this)">未配信</button>
+            </article>
+            <article class="visual-ad-card">
+              <a href="distributor-detail.html?id=ref-3" class="va-image va-image-link thumb-3">🍞<span class="va-badge">制作元</span><span class="va-detail-hint">詳細を見る</span></a>
+              <div class="va-caption"><a href="distributor-detail.html?id=ref-3">新商品パン試食会のお知らせ</a></div>
+              <button class="va-status not-distributing" onclick="toggleStatus(this)">未配信</button>
+            </article>
+            <article class="visual-ad-card">
+              <a href="distributor-detail.html?id=ref-4" class="va-image va-image-link thumb-4">💆<span class="va-badge">制作元</span><span class="va-detail-hint">詳細を見る</span></a>
+              <div class="va-caption"><a href="distributor-detail.html?id=ref-4">梅雨前ボディケアキャンペーン</a></div>
+              <button class="va-status not-distributing" onclick="toggleStatus(this)">未配信</button>
+            </article>
+          </div>
+        </section>
+
+        <!-- ③ 配信候補グリッド（既存 BrowseHomeLayout + AdCardDistributor） -->
+        <div class="browse-body">
+          <nav class="category-sidebar" aria-label="カテゴリー">
+            <h3>カテゴリー</h3>
+            <a href="#" class="active">すべて</a>
+            <a href="#">飲食店</a>
+            <a href="#">生活雑貨</a>
+            <a href="#">生活トラブル・修理</a>
+            <a href="#">家事代行・ケア</a>
+            <a href="#">リフォーム</a>
+            <a href="#">教育・スクール</a>
+            <a href="#">美容・健康</a>
+          </nav>
+
+          <div class="browse-main">
+            <div class="browse-section-title" style="padding-left:0">
+              <h2>配信候補の広告</h2>
+              <p>カテゴリや並び替えで絞り込み、配信するか決められます</p>
+            </div>
+            <div class="filter-bar">
+              <span class="chip active">新着順</span>
+              <span class="chip">終了間近</span>
+              <span class="chip">人気順</span>
+              <span class="chip">お勧め</span>
+            </div>
+
+            <div class="visual-ad-grid">
+              <article class="visual-ad-card">
+                <a href="distributor-detail.html?id=4" class="va-image va-image-link thumb-4" style="font-size:64px">🔧
+                  <span class="va-badge">お勧め</span>
+                  <span class="va-detail-hint">詳細を見る</span>
+                </a>
+                <div class="va-caption"><a href="distributor-detail.html?id=4">水漏れ・鍵のトラブル即日対応</a></div>
+                <button class="va-status not-distributing" onclick="toggleStatus(this)">未配信</button>
+              </article>
+              <article class="visual-ad-card">
+                <a href="distributor-detail.html?id=5" class="va-image va-image-link thumb-5" style="font-size:64px">
+                  💇
+                  <span class="va-detail-hint">詳細を見る</span>
+                </a>
+                <div class="va-caption"><a href="distributor-detail.html?id=5">新規限定カット＋トリートメント 30%OFF</a></div>
+                <button class="va-status not-distributing" onclick="toggleStatus(this)">未配信</button>
+              </article>
+              <article class="visual-ad-card">
+                <a href="distributor-detail.html?id=12" class="va-image va-image-link thumb-1" style="font-size:64px">🥩<span class="va-detail-hint">詳細を見る</span></a>
+                <div class="va-caption"><a href="distributor-detail.html?id=12">週末限定！家族で楽しむ焼肉フェア</a></div>
+                <button class="va-status distributing" onclick="toggleStatus(this)">配信中</button>
+              </article>
+              <article class="visual-ad-card">
+                <a href="distributor-detail.html?id=3" class="va-image va-image-link thumb-3" style="font-size:64px">🏠<span class="va-detail-hint">詳細を見る</span></a>
+                <div class="va-caption"><a href="distributor-detail.html?id=3">春の新生活応援セール開催</a></div>
+                <button class="va-status distributing" onclick="toggleStatus(this)">配信中</button>
+              </article>
+              <article class="visual-ad-card">
+                <a href="distributor-detail.html?id=lottery" class="va-image va-image-link" style="background:linear-gradient(135deg,#f1c40f,#e74c3c);font-size:48px">🎰<span class="va-detail-hint">詳細を見る</span></a>
+                <div class="va-caption" style="min-height:0"></div>
+                <button class="va-status not-distributing" onclick="toggleStatus(this)">未配信</button>
+              </article>
+              <article class="visual-ad-card">
+                <a href="distributor-detail.html?id=1" class="va-image va-image-link" style="background:linear-gradient(135deg,#5dade2,#fff);font-size:48px">📚<span class="va-detail-hint">詳細を見る</span></a>
+                <div class="va-caption"><a href="distributor-detail.html?id=1">冬季講習 受付中</a></div>
+                <button class="va-status distributing" onclick="toggleStatus(this)">配信中</button>
+              </article>
+            </div>
+          </div>
+
+          <aside class="performance-panel">
+            <h3>配信実績</h3>
+            <div class="perf-stat">
+              <div class="label">配信中</div>
+              <div class="val">8</div>
+            </div>
+            <div class="perf-stat">
+              <div class="label">会員参照数</div>
+              <div class="val">2,340</div>
+            </div>
+            <div class="perf-stat">
+              <div class="label">リード数</div>
+              <div class="val">67</div>
+            </div>
+            <p style="margin-top:16px;font-size:0.6875rem;color:var(--text-muted);line-height:1.5">
+              ※ 制作元ピックアップは、<code style="font-size:0.65rem">wasDistributed</code> の履歴から制作元を特定し、未配信の新作を表示
+            </p>
+          </aside>
+        </div>
+
+        <p class="browse-footer-note">※ 配信に協力頂いた会社を広告主とマッチング。</p>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function scrollCarousel(dir) {
+      const el = document.getElementById('featuredCarousel');
+      el.scrollBy({ left: dir * 320, behavior: 'smooth' });
+    }
+    function toggleStatus(btn) {
+      const distributing = btn.classList.contains('distributing');
+      if (distributing) {
+        btn.classList.remove('distributing');
+        btn.classList.add('not-distributing');
+        btn.textContent = '未配信';
+      } else {
+        if (!confirm('この広告を会員へ配信しますか？（デモ）')) return;
+        btn.classList.remove('not-distributing');
+        btn.classList.add('distributing');
+        btn.textContent = '配信中';
+      }
+    }
+    document.querySelectorAll('.chip').forEach(c => {
+      c.addEventListener('click', () => {
+        c.closest('.filter-bar').querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

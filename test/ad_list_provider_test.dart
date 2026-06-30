@@ -110,4 +110,61 @@ void main() {
     expect(allCategory, hasLength(2));
     expect(foodOnly, hasLength(1));
   });
+
+  test('pastAdvertiserNamesFrom collects names from distributed history', () {
+    final ads = [
+      sampleAds[0].copyWith(
+        wasDistributed: true,
+        advertiserCompanyName: '株式会社A',
+      ),
+      sampleAds[1].copyWith(
+        wasDistributed: true,
+        advertiserCompanyName: '株式会社A',
+      ),
+      sampleAds[0].copyWith(
+        id: '3',
+        wasDistributed: false,
+        advertiserCompanyName: '株式会社B',
+      ),
+    ];
+    expect(pastAdvertiserNamesFrom(ads), {'株式会社A'});
+  });
+
+  test('filterPastAdvertiserPickup returns new ads from past advertisers', () {
+    final now = DateTime.now();
+    final all = [
+      sampleAds[0].copyWith(
+        id: 'hist',
+        wasDistributed: true,
+        advertiserCompanyName: '株式会社匠',
+        isDistributing: false,
+        startDate: now.subtract(const Duration(days: 60)),
+        distributionDays: 30,
+      ),
+      sampleAds[1].copyWith(
+        id: 'new-ad',
+        advertiserCompanyName: '株式会社匠',
+        isDistributing: false,
+        isAdvertiserAd: true,
+        startDate: now.subtract(const Duration(days: 2)),
+        distributionDays: 30,
+      ),
+      sampleAds[0].copyWith(
+        id: 'other',
+        advertiserCompanyName: '別会社',
+        isDistributing: false,
+        startDate: now.subtract(const Duration(days: 2)),
+        distributionDays: 30,
+      ),
+    ];
+    final filtered = all;
+
+    final pickup = filterPastAdvertiserPickup(
+      allAds: all,
+      categoryFiltered: filtered,
+    );
+
+    expect(pickup, hasLength(1));
+    expect(pickup.first.id, 'new-ad');
+  });
 }

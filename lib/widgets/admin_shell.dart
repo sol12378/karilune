@@ -58,6 +58,22 @@ class AdminShell extends StatelessWidget {
                     onPressed: () => context.go('/admin/dashboard'),
                   ),
             actions: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Text(
+                  '運営者（デモ）',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
               if (!isDashboard)
                 TextButton.icon(
                   onPressed: () => context.go('/admin/dashboard'),

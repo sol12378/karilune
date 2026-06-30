@@ -1,0 +1,654 @@
+/* ═══════════════════════════════════════════════════════
+   消費者画面 — Flutter AppShell / 会員ホーム準拠
+   画像主体の縦フィード（ストーリーなし・ライトテーマ）
+   ═══════════════════════════════════════════════════════ */
+
+body.consumer-page,
+body.detail-page {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* ── AppShell（Flutter app_shell.dart 準拠） ── */
+.member-app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+}
+
+.member-appbar {
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--divider);
+}
+
+.member-appbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  min-height: 56px;
+}
+
+.member-appbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.member-appbar .brand-icon {
+  color: var(--primary);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.member-appbar .brand-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.01em;
+}
+
+.member-appbar .actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.member-appbar .icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 22px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.member-appbar .icon-btn:hover {
+  background: var(--bg);
+}
+
+/* 配信元バナー（信頼シグナル） */
+.distributor-banner {
+  background: var(--surface);
+  margin: 12px 12px 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border-light);
+}
+
+.distributor-banner .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border: 2px solid var(--primary-mid);
+}
+
+.distributor-banner .name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.distributor-banner .tagline {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+/* ── 縦フィード（画像主体・カード型） ── */
+.feed-scroll {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 80px;
+}
+
+.feed-card {
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+}
+
+.feed-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 8px;
+}
+
+.feed-card-header .left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.feed-card-header .shop-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-card-header .post-time {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* バッジ（Flutter AdCardBadge 準拠） */
+.badge-rec {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.badge-spotlight {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+}
+
+.badge-category {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(21, 101, 192, 0.85);
+}
+
+/* 画像エリア（フィードの主役） */
+.feed-image-link {
+  display: block;
+  text-decoration: none;
+}
+
+.feed-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  position: relative;
+  overflow: hidden;
+}
+
+.feed-image .emoji-hero {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+}
+
+.feed-image .spotlight-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+/* サムネイルグラデーション */
+.thumb-1 { background: linear-gradient(145deg, #7b241c, #c0392b, #e74c3c); }
+.thumb-2 { background: linear-gradient(145deg, #1a5c32, #27ae60, #58d68d); }
+.thumb-3 { background: linear-gradient(145deg, #9a6f0a, #d4a017, #f4d03f); }
+.thumb-4 { background: linear-gradient(145deg, #154360, #2471a3, #5dade2); }
+
+.feed-body {
+  padding: 12px 14px 14px;
+}
+
+.feed-body .company {
+  font-size: 0.6875rem;
+  color: var(--grey-600);
+  margin-bottom: 3px;
+}
+
+.feed-body .catchcopy {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.feed-body .from-line {
+  font-size: 0.75rem;
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+/* メタ情報（FeaturedAdCard の _MetaItem 風） */
+.feed-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  color: var(--grey-700);
+}
+
+.meta-item .meta-icon {
+  font-size: 12px;
+  color: var(--grey-600);
+}
+
+/* アクション行 */
+.feed-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-light);
+}
+
+.favorite-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  font-family: var(--font);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.favorite-btn .heart { font-size: 16px; }
+.favorite-btn.liked { color: #e53935; }
+.favorite-btn.liked .heart { color: #e53935; }
+
+.feed-cta-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-feed {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-feed:hover { opacity: 0.88; }
+
+.btn-feed-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-feed-outline {
+  background: var(--surface);
+  color: var(--primary);
+  border: 1.5px solid var(--primary-mid);
+}
+
+.btn-feed-green {
+  background: var(--distributing);
+  color: #fff;
+}
+
+.feed-detail-link {
+  display: block;
+  text-align: right;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 8px;
+  text-decoration: none;
+}
+
+.feed-detail-link:hover { text-decoration: underline; }
+
+/* ── ボトムナビ（Flutter NavigationBar: ホーム / お気に入り） ── */
+.member-bottom-nav {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--divider);
+  display: flex;
+  justify-content: space-around;
+  padding: 6px 0 max(10px, env(safe-area-inset-bottom));
+  z-index: 100;
+}
+
+.member-bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 20px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.member-bottom-nav a .nav-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.member-bottom-nav a.active {
+  color: var(--primary);
+}
+
+/* ── 詳細画面 ── */
+.detail-app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-appbar {
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--divider);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.detail-appbar .back-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 22px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.detail-appbar .back-btn:hover { background: var(--bg); }
+
+.detail-appbar h1 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.detail-scroll {
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+.detail-image-wrap {
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 16px;
+}
+
+.detail-image {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  position: relative;
+}
+
+.detail-image .emoji-hero {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 96px;
+}
+
+.detail-trust {
+  background: var(--primary-light);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--primary-mid);
+}
+
+.detail-trust .trust-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.detail-trust .trust-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  line-height: 1.4;
+}
+
+.detail-trust .trust-sub {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+.detail-content-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+}
+
+.detail-content-card .category-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.detail-content-card h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.detail-content-card .company {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.detail-content-card .pr {
+  font-size: 0.875rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.detail-info-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-light);
+}
+
+.detail-info-card .info-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+.info-row {
+  display: flex;
+  padding: 7px 0;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.info-row:last-child { border-bottom: none; }
+
+.info-row .label {
+  width: 90px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.info-row .value {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.detail-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border-top: 1px solid var(--divider);
+  padding: 12px 16px max(16px, env(safe-area-inset-bottom));
+  display: flex;
+  gap: 10px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.detail-bottom-bar .btn-favorite {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: none;
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--primary);
+  color: #fff;
+}
+
+.detail-bottom-bar .btn-favorite.saved {
+  background: #e53935;
+}
+
+/* ── お気に入り一覧 ── */
+.favorites-grid {
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-bottom: 80px;
+}
+
+.fav-card {
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  border: 1px solid var(--border-light);
+  transition: box-shadow 0.15s;
+}
+
+.fav-card:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); }
+
+.fav-card .fav-thumb {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+
+.fav-card .fav-label {
+  padding: 8px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+/* デスクトップ用リンクバー */
+.mock-link-bar {
+  background: var(--navy-dark);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  padding: 8px 16px;
+  text-align: center;
+}
+
+.mock-link-bar a {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  margin: 0 6px;
+}
+
+.mock-link-bar a:hover { color: #fff; }

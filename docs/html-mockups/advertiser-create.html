@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新規投稿 — 作成元 — カリルネ</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/operator.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-row"><div class="logo-icon">🔥</div>カリルネ</div>
+        <span class="mode-label">広告投稿モード</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="advertiser.html"><span class="nav-icon">🏠</span> ホーム</a>
+        <a href="advertiser-create.html" class="active"><span class="nav-icon">➕</span> 新規投稿</a>
+        <a href="advertiser.html#history"><span class="nav-icon">📋</span> 投稿履歴</a>
+        <a href="advertiser.html#report"><span class="nav-icon">📊</span> 効果レポート</a>
+        <a href="#"><span class="nav-icon">🔔</span> 通知</a>
+        <a href="#"><span class="nav-icon">👤</span> アカウント</a>
+      </nav>
+      <div class="sidebar-footer"><a href="index.html">← ポータルに戻る</a></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="mobile-nav-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1>新規広告投稿</h1>
+        </div>
+        <a href="advertiser.html" class="btn btn-outline btn-sm">キャンセル</a>
+      </header>
+
+      <div class="page-body">
+        <div class="step-indicator" aria-label="投稿ステップ">
+          <div class="step done">1. 素材</div>
+          <div class="step current">2. 内容</div>
+          <div class="step">3. 配信設定</div>
+          <div class="step">4. 料金確認</div>
+          <div class="step">5. 公開</div>
+        </div>
+
+        <div class="form-card">
+          <div class="ai-banner">
+            <p>✨ <strong>AIアシスト</strong> — キャッチコピーやPR文の下書きを自動生成</p>
+            <button class="btn btn-accent btn-sm">AIで生成</button>
+          </div>
+
+          <div class="form-group">
+            <label>広告画像 <span class="required">*</span></label>
+            <div class="upload-zone" role="button" tabindex="0">
+              <div class="upload-icon">📷</div>
+              <p>クリックまたはドラッグ＆ドロップで画像をアップロード</p>
+              <small>推奨: 1080×1080px（正方形）・複数枚対応</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="company">店舗・会社名 <span class="required">*</span></label>
+            <input id="company" type="text" value="名古屋焼肉 炎">
+          </div>
+
+          <div class="form-group">
+            <label for="catch">キャッチコピー <span class="required">*</span></label>
+            <input id="catch" type="text" value="週末限定！家族で楽しむ焼肉フェア開催中">
+          </div>
+
+          <div class="form-group">
+            <label for="pr">PR本文</label>
+            <textarea id="pr">国産黒毛和牛を使用した特選コースが今週末限定でお得です。ご家族でのお食事、会社宴会にも最適。事前予約でドリンクサービス付き。</textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">カテゴリ</label>
+              <select id="category">
+                <option>飲食店</option>
+                <option>生活雑貨</option>
+                <option>美容・健康</option>
+                <option>ガス・設備</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="area">対象地域</label>
+              <select id="area">
+                <option>愛知県</option>
+                <option>岐阜県</option>
+                <option>三重県</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>問い合わせ先</label>
+            <div class="form-row">
+              <input type="tel" value="052-111-2222" placeholder="電話番号" aria-label="電話番号">
+              <input type="url" value="https://honoo-yakiniku.example.com" placeholder="Webサイト" aria-label="Webサイト">
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <button class="btn btn-outline">下書き保存</button>
+            <button class="btn btn-primary" style="flex:1">次へ：配信設定 →</button>
+          </div>
+        </div>
+
+        <div class="preview-frame-wrap">
+          <h2>会員への表示プレビュー</h2>
+          <p>配信者が選んだ後、消費者にはこのように見えます</p>
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-frame-header">
+              <div class="mini-avatar">⛽</div>
+              <div>
+                <div class="mini-name">○○ガス 名古屋支店</div>
+                <div class="mini-sub">おすすめ情報</div>
+              </div>
+            </div>
+            <div class="phone-frame-image thumb-1">🥩</div>
+            <div class="phone-frame-caption">週末限定！家族で楽しむ焼肉フェア開催中</div>
+          </div>
+          <p style="margin-top:12px;font-size:var(--text-sm)">
+            <a href="consumer.html">→ 消費者画面の全体像を見る</a>
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

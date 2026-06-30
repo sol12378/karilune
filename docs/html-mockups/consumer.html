@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1565C0">
+  <meta name="color-scheme" content="light">
+  <title>ホーム — カリルネ</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/consumer.css">
+</head>
+<body class="consumer-page">
+
+  <div class="mock-link-bar">
+    <a href="index.html">ポータル</a> ·
+    <a href="distributor.html">配信者画面</a>
+  </div>
+
+  <div class="member-app">
+    <!-- AppBar（Flutter AppShell 準拠） -->
+    <header class="member-appbar">
+      <div class="member-appbar-inner">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">📢</span>
+          <span class="brand-name">カリルネ</span>
+        </div>
+        <div class="actions">
+          <button class="icon-btn" aria-label="通知">🔔</button>
+          <button class="icon-btn" aria-label="アカウント">👤</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 配信元の信頼シグナル -->
+    <div class="distributor-banner">
+      <div class="avatar" aria-hidden="true">⛽</div>
+      <div>
+        <div class="name">○○ガス 名古屋支店からのおすすめ</div>
+        <div class="tagline">あなたの街のガス会社が厳選した情報です</div>
+      </div>
+    </div>
+
+    <!-- 縦フィード（画像主体・ストーリーなし） -->
+    <main class="feed-scroll">
+
+      <article class="feed-card">
+        <div class="feed-card-header">
+          <div class="left">
+            <span class="badge-rec">おすすめ</span>
+            <span class="shop-name">名古屋焼肉 炎</span>
+          </div>
+        </div>
+        <a href="consumer-detail.html?id=1" class="feed-image-link">
+          <div class="feed-image thumb-1">
+            <span class="spotlight-badge badge-spotlight">注目</span>
+            <div class="emoji-hero" aria-hidden="true">🥩</div>
+          </div>
+        </a>
+        <div class="feed-body">
+          <div class="company">名古屋焼肉 炎</div>
+          <div class="catchcopy">週末限定！家族で楽しむ焼肉フェア開催中</div>
+          <div class="from-line">○○ガス 名古屋支店がおすすめする飲食店情報</div>
+          <div class="feed-meta">
+            <span class="meta-item"><span class="meta-icon">🏷</span>飲食店</span>
+            <span class="meta-item"><span class="meta-icon">📍</span>愛知県</span>
+            <span class="meta-item"><span class="meta-icon">📅</span>残り27日</span>
+          </div>
+          <div class="feed-actions">
+            <button class="favorite-btn" onclick="toggleFav(this)">
+              <span class="heart">♡</span> お気に入り
+            </button>
+            <div class="feed-cta-group">
+              <button class="btn-feed btn-feed-green" onclick="alert('052-111-2222（デモ）')">📞 電話</button>
+              <button class="btn-feed btn-feed-primary" onclick="location.href='consumer-detail.html?id=1'">詳しく見る</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="feed-card">
+        <div class="feed-card-header">
+          <div class="left">
+            <span class="shop-name">○○ガス 名古屋支店</span>
+          </div>
+        </div>
+        <a href="consumer-detail.html?id=2" class="feed-image-link">
+          <div class="feed-image thumb-2">
+            <div class="emoji-hero" aria-hidden="true">🔧</div>
+          </div>
+        </a>
+        <div class="feed-body">
+          <div class="company">○○ガス 名古屋支店</div>
+          <div class="catchcopy">会員様限定・ガス機器安全点検無料</div>
+          <div class="feed-meta">
+            <span class="meta-item"><span class="meta-icon">🏷</span>ガス・設備</span>
+            <span class="meta-item"><span class="meta-icon">📍</span>愛知県</span>
+            <span class="meta-item"><span class="meta-icon">📅</span>残り45日</span>
+          </div>
+          <div class="feed-actions">
+            <button class="favorite-btn liked" onclick="toggleFav(this)">
+              <span class="heart">♥</span> お気に入り済み
+            </button>
+            <div class="feed-cta-group">
+              <button class="btn-feed btn-feed-green" onclick="alert('052-000-0000（デモ）')">📞 申込</button>
+              <button class="btn-feed btn-feed-primary" onclick="location.href='consumer-detail.html?id=2'">詳しく見る</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="feed-card">
+        <div class="feed-card-header">
+          <div class="left">
+            <span class="badge-rec">おすすめ</span>
+            <span class="shop-name">暮らしの雑貨 ひだまり</span>
+          </div>
+        </div>
+        <a href="consumer-detail.html?id=3" class="feed-image-link">
+          <div class="feed-image thumb-3">
+            <div class="emoji-hero" aria-hidden="true">🏠</div>
+          </div>
+        </a>
+        <div class="feed-body">
+          <div class="company">暮らしの雑貨 ひだまり</div>
+          <div class="catchcopy">春の新生活応援セール開催</div>
+          <div class="from-line">○○ガス 名古屋支店がおすすめするお店情報</div>
+          <div class="feed-meta">
+            <span class="meta-item"><span class="meta-icon">🏷</span>生活雑貨</span>
+            <span class="meta-item"><span class="meta-icon">📍</span>岐阜県</span>
+            <span class="meta-item"><span class="meta-icon">📅</span>残り13日</span>
+          </div>
+          <div class="feed-actions">
+            <button class="favorite-btn" onclick="toggleFav(this)">
+              <span class="heart">♡</span> お気に入り
+            </button>
+            <div class="feed-cta-group">
+              <button class="btn-feed btn-feed-primary" onclick="alert('来店予約（デモ）')">🏪 来店予約</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="feed-card">
+        <div class="feed-card-header">
+          <div class="left">
+            <span class="badge-rec">おすすめ</span>
+            <span class="shop-name">ヘアサロン Bloom</span>
+          </div>
+        </div>
+        <div class="feed-image thumb-4">
+          <div class="emoji-hero" aria-hidden="true">💇</div>
+        </div>
+        <div class="feed-body">
+          <div class="company">ヘアサロン Bloom</div>
+          <div class="catchcopy">新規限定カット＋トリートメント 30%OFF</div>
+          <div class="feed-meta">
+            <span class="meta-item"><span class="meta-icon">🏷</span>美容・健康</span>
+            <span class="meta-item"><span class="meta-icon">📍</span>愛知県</span>
+            <span class="meta-item"><span class="meta-icon">📅</span>残り28日</span>
+          </div>
+          <div class="feed-actions">
+            <button class="favorite-btn" onclick="toggleFav(this)">
+              <span class="heart">♡</span> お気に入り
+            </button>
+            <div class="feed-cta-group">
+              <button class="btn-feed btn-feed-outline">詳しく見る →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </main>
+
+    <!-- ボトムナビ（Flutter memberNavItems: ホーム / お気に入り） -->
+    <nav class="member-bottom-nav" aria-label="メインナビゲーション">
+      <a href="consumer.html" class="active" aria-current="page">
+        <span class="nav-icon">🏠</span>ホーム
+      </a>
+      <a href="consumer-saved.html">
+        <span class="nav-icon">♡</span>お気に入り
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    function toggleFav(btn) {
+      const liked = btn.classList.toggle('liked');
+      btn.innerHTML = liked
+        ? '<span class="heart">♥</span> お気に入り済み'
+        : '<span class="heart">♡</span> お気に入り';
+    }
+  </script>
+</body>
+</html>

@@ -7,6 +7,9 @@ import '../../providers/notification_repository.dart';
 import '../../widgets/admin_shell.dart';
 import '../../widgets/app_shell.dart';
 import '../../widgets/empty_state.dart';
+import '../../widgets/ideal/consumer/member_content_frame.dart';
+import '../../widgets/ideal/consumer/notification_tile.dart';
+import '../../widgets/ideal/ideal_theme.dart';
 import '../../widgets/operator/operator_mode.dart';
 import '../../widgets/operator/operator_shell.dart';
 
@@ -45,11 +48,35 @@ class NotificationsPage extends ConsumerWidget {
             description: '新しいお知らせが届くとここに表示されます。',
           )
         : ListView.separated(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(
+              role == 'member' ? IdealSpacing.feedPadding : 16,
+            ),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, __) => SizedBox(
+              height: role == 'member' ? IdealSpacing.sm : 8,
+            ),
             itemBuilder: (context, index) {
               final item = items[index];
+              if (role == 'member') {
+                return NotificationTile(
+                  title: item.title,
+                  body: item.body,
+                  timeLabel: dateFormat.format(item.createdAt),
+                  isRead: item.isRead,
+                  showChevron: item.targetRoute != null,
+                  onTap: () {
+                    notifier.markRead(item.id);
+                    if (item.targetRoute != null) {
+                      final route = item.targetRoute!;
+                      if (route.startsWith('/ads/')) {
+                        context.push(route);
+                      } else {
+                        context.go(route);
+                      }
+                    }
+                  },
+                );
+              }
               return Card(
                 child: ListTile(
                   leading: CircleAvatar(
@@ -102,6 +129,13 @@ class NotificationsPage extends ConsumerWidget {
             },
           );
 
+    final content = role == 'member'
+        ? MemberContentFrame(
+            style: MemberFrameStyle.mobileFeed,
+            child: body,
+          )
+        : body;
+
     if (useOperatorShell) {
       final location = GoRouterState.of(context).matchedLocation;
       return OperatorShell(
@@ -129,7 +163,7 @@ class NotificationsPage extends ConsumerWidget {
       navItems: navItems,
       selectedNavIndex: selectedNavIndex,
       onNavTap: onNavTap!,
-      child: body,
+      child: content,
     );
   }
 }

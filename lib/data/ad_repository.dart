@@ -1,11 +1,18 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../mock_data/ads_mock.dart';
+import '../mock_data/demo_scenarios.dart';
 import '../models/ad.dart';
 import '../models/ad_publication_status.dart';
+import '../models/notification.dart';
+import '../providers/notification_repository.dart';
+import 'audit_log_repository.dart';
 
 class AdRepository extends StateNotifier<List<Ad>> {
-  AdRepository() : super(List<Ad>.from(initialAds));
+  AdRepository({required Ref ref, DemoScenarioId scenario = DemoScenarioId.s1Default})
+      : _ref = ref,
+        super(adsForScenario(scenario));
+
+  final Ref _ref;
 
   List<Ad> getAll() => state;
 
@@ -44,6 +51,13 @@ class AdRepository extends StateNotifier<List<Ad>> {
           },
         )
         .toList();
+    _ref.read(auditLogRepositoryProvider.notifier).log(
+          actor: '配信者',
+          action: '配信切替',
+          targetType: 'ad',
+          targetId: adId,
+          detail: findById(adId)?.isDistributing == true ? 'ON' : 'OFF',
+        );
   }
 
   void incrementViewCount(String adId) {
@@ -59,9 +73,112 @@ class AdRepository extends StateNotifier<List<Ad>> {
   void publishAfterPayment(Ad ad) {
     upsert(ad.copyWith(publicationStatus: AdPublicationStatus.published));
   }
+
+  void approveReview(String adId) {
+    final ad = findById(adId);
+    if (ad == null || !ad.isPendingReview) return;
+    upsert(
+      ad.copyWith(
+        publicationStatus: AdPublicationStatus.published,
+        reviewedAt: DateTime.now(),
+        reviewNote: null,
+      ),
+    );
+    _ref.read(auditLogRepositoryProvider.notifier).log(
+          actor: '運営',
+          action: '審査承認',
+          targetType: 'ad',
+          targetId: adId,
+          detail: ad.companyName,
+        );
+    _ref.read(notificationRepositoryProvider.notifier).addNotification(
+          AppNotification(
+            id: 'dyn-review-$adId-${DateTime.now().millisecondsSinceEpoch}',
+            title: '新着広告が審査通過しました',
+            body: '「${ad.companyName}」の配信を検討してください。',
+            createdAt: DateTime.now(),
+            adId: adId,
+            targetRoute: '/ads/$adId?from=distributor',
+          ),
+        );
+  }
+
+  void rejectReview(String adId, String note) {
+    final ad = findById(adId);
+    if (ad == null || !ad.isPendingReview) return;
+    upsert(
+      ad.copyWith(
+        publicationStatus: AdPublicationStatus.rejected,
+        reviewNote: note,
+        reviewedAt: DateTime.now(),
+      ),
+    );
+    _ref.read(auditLogRepositoryProvider.notifier).log(
+          actor: '運営',
+          action: '審査却下',
+          targetType: 'ad',
+          targetId: adId,
+          detail: note,
+        );
+  }
+
+  void returnToDraft(String adId, String note) {
+    final ad = findById(adId);
+    if (ad == null || !ad.isPendingReview) return;
+    upsert(
+      ad.copyWith(
+        publicationStatus: AdPublicationStatus.draft,
+        reviewNote: note,
+        reviewedAt: DateTime.now(),
+      ),
+    );
+    _ref.read(auditLogRepositoryProvider.notifier).log(
+          actor: '運営',
+          action: '審査差戻し',
+          targetType: 'ad',
+          targetId: adId,
+          detail: note,
+        );
+  }
+
+  void resubmitForReview(String adId) {
+    final ad = findById(adId);
+    if (ad == null || (!ad.isDraft && !ad.isRejected)) return;
+    upsert(
+      ad.copyWith(
+        publicationStatus: AdPublicationStatus.pendingReview,
+        reviewNote: null,
+        reviewedAt: null,
+      ),
+    );
+    _ref.read(auditLogRepositoryProvider.notifier).log(
+          actor: '作成元',
+          action: '再申請',
+          targetType: 'ad',
+          targetId: adId,
+          detail: ad.companyName,
+        );
+  }
+
+  void emergencyStop(String adId) {
+    final ad = findById(adId);
+    if (ad == null) return;
+    upsert(ad.copyWith(isDistributing: false));
+    _ref.read(auditLogRepositoryProvider.notifier).log(
+          actor: '運営',
+          action: '緊急停止',
+          targetType: 'ad',
+          targetId: adId,
+          detail: ad.companyName,
+        );
+  }
+
+  void resetToScenario(DemoScenarioId scenario) {
+    state = adsForScenario(scenario);
+  }
 }
 
 final adRepositoryProvider =
     StateNotifierProvider<AdRepository, List<Ad>>((ref) {
-  return AdRepository();
+  return AdRepository(ref: ref);
 });

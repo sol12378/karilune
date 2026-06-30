@@ -61,13 +61,43 @@ final initialFeaturedPlacements = <FeaturedPlacement>[
   const FeaturedPlacement(
     id: 'fp-distributor-02',
     placementKey: FeaturedPlacementKeys.distributorHomeSpotlight,
-    adId: 'ad-007',
+    adId: 'ad-001',
     sortOrder: 1,
   ),
   const FeaturedPlacement(
     id: 'fp-distributor-03',
     placementKey: FeaturedPlacementKeys.distributorHomeSpotlight,
-    adId: 'ad-006',
+    adId: 'ad-007',
     sortOrder: 2,
+  ),
+  const FeaturedPlacement(
+    id: 'fp-distributor-04',
+    placementKey: FeaturedPlacementKeys.distributorHomeSpotlight,
+    adId: 'ad-005',
+    sortOrder: 3,
+  ),
+  const FeaturedPlacement(
+    id: 'fp-distributor-05',
+    placementKey: FeaturedPlacementKeys.distributorHomeSpotlight,
+    adId: 'ad-010',
+    sortOrder: 4,
+  ),
+  const FeaturedPlacement(
+    id: 'fp-distributor-06',
+    placementKey: FeaturedPlacementKeys.distributorHomeSpotlight,
+    adId: 'ad-012',
+    sortOrder: 5,
+  ),
+  const FeaturedPlacement(
+    id: 'fp-distributor-07',
+    placementKey: FeaturedPlacementKeys.distributorHomeSpotlight,
+    adId: 'ad-013',
+    sortOrder: 6,
+  ),
+  const FeaturedPlacement(
+    id: 'fp-distributor-08',
+    placementKey: FeaturedPlacementKeys.distributorHomeSpotlight,
+    adId: 'ad-014',
+    sortOrder: 7,
   ),
 ];

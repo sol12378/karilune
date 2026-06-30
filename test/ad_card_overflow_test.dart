@@ -2,6 +2,7 @@ import 'package:carilune/models/ad.dart';
 import 'package:carilune/providers/account_provider.dart';
 import 'package:carilune/widgets/ad_card_consumer.dart';
 import 'package:carilune/widgets/ad_card_distributor.dart';
+import 'package:carilune/widgets/ad_card_distributor_visual.dart';
 import 'package:carilune/widgets/ad_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,6 +65,62 @@ void main() {
     await tester.pumpWidget(app);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('AdCardDistributorVisual opens detail on image tap', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 440));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    var tapped = false;
+    final app = await scopedApp(
+      SizedBox(
+        width: 300,
+        height: 420,
+        child: AdCardDistributorVisual(
+          ad: testAd,
+          onTap: () => tapped = true,
+        ),
+      ),
+    );
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+
+    expect(find.text('詳細を見る'), findsOneWidget);
+    await tester.tap(find.text('詳細を見る'));
+    await tester.pumpAndSettle();
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('AdCardDistributorVisual shows status button', (tester) async {
+    await tester.binding.setSurfaceSize(const Size(320, 440));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    final distributingAd = testAd.copyWith(isDistributing: true);
+    final app = await scopedApp(
+      SizedBox(
+        width: 300,
+        height: 420,
+        child: AdCardDistributorVisual(ad: distributingAd),
+      ),
+    );
+    await tester.pumpWidget(app);
+    await tester.pumpAndSettle();
+
+    expect(find.text('配信中'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    final pendingAd = testAd.copyWith(isDistributing: false);
+    await tester.pumpWidget(
+      await scopedApp(
+        SizedBox(
+          width: 300,
+          height: 420,
+          child: AdCardDistributorVisual(ad: pendingAd),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('未配信'), findsOneWidget);
   });
 
   testWidgets('AdCardDistributor shows recommended badge for spotlight ads', (

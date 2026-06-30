@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/ad.dart';
 import '../../models/carousel_viewport_config.dart';
 import '../../providers/ad_list_provider.dart';
 import '../../theme/app_theme.dart';
@@ -26,10 +27,16 @@ class FeaturedAdsCarousel extends ConsumerStatefulWidget {
     super.key,
     this.linkFrom = 'member',
     this.viewportConfig = _kCarouselConfig,
+    this.adsProvider,
+    this.title = '注目の広告',
+    this.subtitle = 'オプション設定の広告をピックアップ',
   });
 
   final String linkFrom;
   final CarouselViewportConfig viewportConfig;
+  final ProviderListenable<List<Ad>>? adsProvider;
+  final String title;
+  final String subtitle;
 
   @override
   ConsumerState<FeaturedAdsCarousel> createState() =>
@@ -191,7 +198,7 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final ads = ref.watch(spotlightAdsProvider);
+    final ads = ref.watch(widget.adsProvider ?? spotlightAdsProvider);
     final itemCount = ads.length;
     final engine = _engine;
 
@@ -200,9 +207,12 @@ class _FeaturedAdsCarouselState extends ConsumerState<FeaturedAdsCarousel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: _SectionTitle(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _SectionTitle(
+              title: widget.title,
+              subtitle: widget.subtitle,
+            ),
           ),
           const SizedBox(height: 12),
           LayoutBuilder(
@@ -443,7 +453,13 @@ class _EdgeFadeMask extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle();
+  const _SectionTitle({
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -451,7 +467,7 @@ class _SectionTitle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '注目の広告',
+          title,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
@@ -459,7 +475,7 @@ class _SectionTitle extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          'オプション設定の広告をピックアップ',
+          subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Colors.grey.shade600,
               ),

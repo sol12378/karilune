@@ -7,6 +7,8 @@ class AppColors {
   static const background = Color(0xFFF0F2F5);
   static const card = Colors.white;
   static const distributing = Color(0xFF43A047);
+  /// 配信判断画面：未配信ステータス（ワイヤーフレーム準拠）
+  static const notDistributing = Color(0xFFE67E22);
   static const scheduled = Color(0xFF1565C0);
   static const ended = Color(0xFF9E9E9E);
 }

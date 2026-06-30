@@ -139,10 +139,12 @@ class AdFormNotifier extends StateNotifier<AdFormState> {
       distributorCount: existing?.distributorCount ?? 0,
       viewCount: existing?.viewCount ?? 0,
       isDistributing: existing?.isDistributing ?? false,
-      advertiserCompanyName: '株式会社○○ガス 広告部',
-      advertiserUrl: 'https://gas-company.example.com/ad',
-      advertiserTel: '052-000-1111',
-      advertiserContact: '広報 けんじゃ',
+      wasDistributed: existing?.wasDistributed ?? false,
+      advertiserCompanyName:
+          existing?.advertiserCompanyName ?? '株式会社○○ガス 広告部',
+      advertiserUrl: existing?.advertiserUrl ?? 'https://gas-company.example.com/ad',
+      advertiserTel: existing?.advertiserTel ?? '052-000-1111',
+      advertiserContact: existing?.advertiserContact ?? '広報 けんじゃ',
     );
   }
 

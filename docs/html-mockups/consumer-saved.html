@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1565C0">
+  <title>お気に入り — カリルネ</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/consumer.css">
+</head>
+<body class="consumer-page">
+
+  <div class="mock-link-bar">
+    <a href="consumer.html">← ホーム</a> ·
+    <a href="index.html">ポータル</a>
+  </div>
+
+  <div class="member-app">
+    <header class="member-appbar">
+      <div class="member-appbar-inner">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">📢</span>
+          <span class="brand-name">カリルネ</span>
+        </div>
+        <div class="actions">
+          <button class="icon-btn" aria-label="通知">🔔</button>
+          <button class="icon-btn" aria-label="アカウント">👤</button>
+        </div>
+      </div>
+    </header>
+
+    <div style="padding:16px 16px 8px">
+      <h2 style="font-size:1rem;font-weight:700;color:var(--text)">お気に入り</h2>
+      <p style="font-size:0.8125rem;color:var(--text-muted);margin-top:4px">気になる広告を保存しています（3件）</p>
+    </div>
+
+    <div class="favorites-grid">
+      <a href="consumer-detail.html?id=1" class="fav-card">
+        <div class="fav-thumb thumb-1">🥩</div>
+        <div class="fav-label">週末限定！焼肉フェア</div>
+      </a>
+      <a href="consumer-detail.html?id=2" class="fav-card">
+        <div class="fav-thumb thumb-2">🔧</div>
+        <div class="fav-label">ガス機器安全点検無料</div>
+      </a>
+      <a href="consumer-detail.html?id=3" class="fav-card">
+        <div class="fav-thumb thumb-3">🏠</div>
+        <div class="fav-label">春の新生活応援セール</div>
+      </a>
+    </div>
+
+    <nav class="member-bottom-nav">
+      <a href="consumer.html">
+        <span class="nav-icon">🏠</span>ホーム
+      </a>
+      <a href="consumer-saved.html" class="active" aria-current="page">
+        <span class="nav-icon">♡</span>お気に入り
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

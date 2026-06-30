@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>広告管理 — 作成元 — カリルネ</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/operator.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-row">
+          <div class="logo-icon">🔥</div>
+          カリルネ
+        </div>
+        <span class="mode-label">広告投稿モード</span>
+      </div>
+      <nav class="sidebar-nav" aria-label="メインナビゲーション">
+        <a href="advertiser.html" class="active"><span class="nav-icon">🏠</span> ホーム</a>
+        <a href="advertiser-create.html"><span class="nav-icon">➕</span> 新規投稿</a>
+        <a href="advertiser.html#history"><span class="nav-icon">📋</span> 投稿履歴</a>
+        <a href="advertiser.html#report"><span class="nav-icon">📊</span> 効果レポート</a>
+        <a href="#"><span class="nav-icon">🔔</span> 通知 <span class="badge-count">2</span></a>
+        <a href="#"><span class="nav-icon">👤</span> アカウント</a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="index.html">← ポータルに戻る</a>
+        <div class="org-name">株式会社○○ガス 広告部</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="mobile-nav-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="メニュー">☰</button>
+          <h1>広告管理ダッシュボード</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="role-switch">配信者画面 → <a href="distributor.html">切替</a></span>
+          <a href="advertiser-create.html" class="btn btn-accent btn-sm">＋ 新規投稿</a>
+        </div>
+      </header>
+
+      <div class="page-body">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">配信中の広告</div>
+            <div class="value">5</div>
+            <div class="delta">＋1 今月</div>
+          </div>
+          <div class="stat-card accent">
+            <div class="label">配信者数（合計）</div>
+            <div class="value">47</div>
+            <div class="delta">12% 先月比</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">参照数（合計）</div>
+            <div class="value">8,420</div>
+            <div class="delta">23% 先月比</div>
+          </div>
+          <div class="stat-card green">
+            <div class="label">リード数</div>
+            <div class="value">186</div>
+            <div class="delta">8% 先月比</div>
+          </div>
+        </div>
+
+        <section class="section" id="active">
+          <div class="section-header">
+            <div>
+              <h2>配信中</h2>
+              <p>ガス会社等の配信者が会員へ届けている広告</p>
+            </div>
+          </div>
+          <div class="filter-bar" role="group" aria-label="フィルター">
+            <span class="chip active">すべて</span>
+            <span class="chip">注目オプション付き</span>
+            <span class="chip">終了間近</span>
+          </div>
+          <div class="ad-grid">
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-1 thumb-emoji" data-emoji="🥩">
+                <div class="badges">
+                  <span class="badge badge-spotlight">注目</span>
+                  <span class="badge badge-active">配信中</span>
+                </div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">名古屋焼肉 炎</div>
+                <div class="catch">週末限定！家族で楽しむ焼肉フェア開催中</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">配信者</div><div class="s-val">12</div></div>
+                  <div><div class="s-label">参照</div><div class="s-val">1,840</div></div>
+                  <div><div class="s-label">リード</div><div class="s-val">42</div></div>
+                  <div><div class="s-label">残り</div><div class="s-val">27日</div></div>
+                </div>
+                <button class="btn btn-outline btn-sm btn-block">効果レポートを見る</button>
+              </div>
+            </article>
+
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-3 thumb-emoji" data-emoji="🔧">
+                <div class="badges"><span class="badge badge-active">配信中</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">ガス機器点検キャンペーン</div>
+                <div class="catch">会員様限定・ガス機器安全点検無料</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">配信者</div><div class="s-val">28</div></div>
+                  <div><div class="s-label">参照</div><div class="s-val">3,210</div></div>
+                  <div><div class="s-label">リード</div><div class="s-val">89</div></div>
+                  <div><div class="s-label">残り</div><div class="s-val">45日</div></div>
+                </div>
+                <button class="btn btn-outline btn-sm btn-block">効果レポートを見る</button>
+              </div>
+            </article>
+
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-2 thumb-emoji" data-emoji="🏠">
+                <div class="badges"><span class="badge badge-active">配信中</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">暮らしの雑貨 ひだまり</div>
+                <div class="catch">春の新生活応援セール開催</div>
+                <div class="op-ad-stats">
+                  <div><div class="s-label">配信者</div><div class="s-val">8</div></div>
+                  <div><div class="s-label">参照</div><div class="s-val">620</div></div>
+                  <div><div class="s-label">リード</div><div class="s-val">15</div></div>
+                  <div><div class="s-label">残り</div><div class="s-val">13日</div></div>
+                </div>
+                <button class="btn btn-outline btn-sm btn-block">効果レポートを見る</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="history">
+          <div class="section-header">
+            <div>
+              <h2>審査中・下書き</h2>
+              <p>公開前の広告を管理</p>
+            </div>
+          </div>
+          <div class="ad-grid">
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-4 thumb-emoji" data-emoji="☀️">
+                <div class="badges"><span class="badge badge-pending">審査中</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">夏のガスフェア</div>
+                <div class="catch">ガスコンロ買い替えキャンペーン</div>
+                <button class="btn btn-outline btn-sm btn-block">内容を確認</button>
+              </div>
+            </article>
+            <article class="op-ad-card">
+              <div class="op-ad-thumb thumb-6 thumb-emoji" data-emoji="📝">
+                <div class="badges"><span class="badge badge-draft">下書き</span></div>
+              </div>
+              <div class="op-ad-body">
+                <div class="company">秋の暖房キャンペーン</div>
+                <div class="catch">作成中…</div>
+                <a href="advertiser-create.html" class="btn btn-primary btn-sm btn-block">編集を続ける</a>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="report">
+          <div class="section-header">
+            <div>
+              <h2>効果レポート（先月）</h2>
+              <p>配信者経由で会員に届いた広告の成果</p>
+            </div>
+          </div>
+          <div class="report-card">
+            <div class="report-grid">
+              <div class="report-block">
+                <div class="report-label">参照数の推移</div>
+                <div class="bar-chart" aria-hidden="true">
+                  <div class="bar" style="height:40%"></div>
+                  <div class="bar" style="height:55%"></div>
+                  <div class="bar" style="height:48%"></div>
+                  <div class="bar" style="height:72%"></div>
+                  <div class="bar" style="height:100%"></div>
+                </div>
+              </div>
+              <div class="report-block">
+                <div class="report-label">リード獲得チャネル</div>
+                <div style="font-size:var(--text-sm);line-height:2.2;color:var(--text-secondary)">
+                  📞 電話問い合わせ <strong style="color:var(--text)">98件</strong><br>
+                  🏪 来店予約 <strong style="color:var(--text)">52件</strong><br>
+                  🌐 Web申込 <strong style="color:var(--text)">36件</strong>
+                </div>
+              </div>
+              <div class="report-block">
+                <div class="report-label">AI最適化の提案</div>
+                <div class="ai-tip">
+                  💡 土曜午前の配信で参照数が38%向上。次回も同時間帯を推奨します。
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <a href="advertiser-create.html" class="fab" title="新規投稿" aria-label="新規投稿">＋</a>
+    </main>
+  </div>
+  <script>
+    document.querySelectorAll('.chip').forEach(c => {
+      c.addEventListener('click', () => {
+        c.closest('.filter-bar').querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+        c.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

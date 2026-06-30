@@ -17,6 +17,7 @@ class BrowseHomeLayout extends ConsumerWidget {
   const BrowseHomeLayout({
     super.key,
     this.featured,
+    this.pickup,
     this.showCategorySidebar = true,
     this.showPrefectureFilter = false,
     this.mainHeader,
@@ -27,6 +28,8 @@ class BrowseHomeLayout extends ConsumerWidget {
   });
 
   final Widget? featured;
+  /// 注目カルーセル直下のピックアップ帯（例: 過去配信した制作元の広告）。
+  final Widget? pickup;
   final bool showCategorySidebar;
   final bool showPrefectureFilter;
   final Widget? mainHeader;
@@ -55,6 +58,7 @@ class BrowseHomeLayout extends ConsumerWidget {
           slivers: [
             if (featured != null)
               SliverToBoxAdapter(child: featured!),
+            if (pickup != null) SliverToBoxAdapter(child: pickup!),
             if (showCompactTrailing)
               SliverToBoxAdapter(child: compactTrailingPanel!),
             if (showCategorySidebar && !useSidebar) ...[

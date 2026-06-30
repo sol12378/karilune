@@ -9,7 +9,12 @@ import '../../providers/favorites_provider.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/date_formats.dart';
 import '../../utils/pricing_calculator.dart';
+import '../../utils/mock_contact_actions.dart';
 import '../../widgets/ad_thumbnail.dart';
+import '../../widgets/ideal/consumer/ad_report_dialog.dart';
+import '../../widgets/ideal/consumer/member_ad_detail_body.dart';
+import '../../widgets/ideal/consumer/member_content_frame.dart';
+import '../distributor/distributor_actions.dart';
 
 class AdDetailPage extends ConsumerStatefulWidget {
   const AdDetailPage({super.key, required this.adId, this.fromMode});
@@ -46,7 +51,8 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
         GoRouterState.of(context).uri.queryParameters['from'] ??
         'member';
     final isMemberMode = mode == 'member';
-    final showDistributeButton = mode == 'distributor';
+    final isDistributorMode = mode == 'distributor';
+    final showDistributeButton = isDistributorMode;
     final isAdvertiserMode = mode == 'advertiser';
     final isFavorite = ref.watch(isFavoriteProvider(adId));
 
@@ -57,12 +63,16 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
       );
     }
 
-    final total = PricingCalculator.calculateTotal(
-      distributionDays: ad.distributionDays,
-      hasSpotlightOption: ad.hasSpotlightOption,
-      hasDistributionRequestNotification: ad.hasDistributionRequestNotification,
-      hasDistributionSettingNotification: ad.hasDistributionSettingNotification,
-    );
+    final total = isDistributorMode
+        ? 0
+        : PricingCalculator.calculateTotal(
+            distributionDays: ad.distributionDays,
+            hasSpotlightOption: ad.hasSpotlightOption,
+            hasDistributionRequestNotification:
+                ad.hasDistributionRequestNotification,
+            hasDistributionSettingNotification:
+                ad.hasDistributionSettingNotification,
+          );
 
     return Scaffold(
       appBar: AppBar(
@@ -71,8 +81,28 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
+        actions: isMemberMode
+            ? [
+                IconButton(
+                  tooltip: '通報',
+                  icon: const Icon(Icons.flag_outlined),
+                  onPressed: () => showAdReportDialog(
+                    context,
+                    ref,
+                    adId: adId,
+                  ),
+                ),
+              ]
+            : null,
       ),
-      body: SingleChildScrollView(
+      body: isMemberMode
+          ? MemberContentFrame(
+              style: MemberFrameStyle.detail,
+              child: SingleChildScrollView(
+                child: MemberAdDetailBody(ad: ad),
+              ),
+            )
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Center(
           child: ConstrainedBox(
@@ -85,19 +115,10 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
                     assetPath: ad.thumbnailAssetPath,
                     networkUrl: ad.thumbnailUrl,
                     width: 300,
-                    height: isMemberMode ? 200 : 400,
+                    height: 400,
                   ),
                 ),
                 const SizedBox(height: 24),
-                if (isMemberMode)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Chip(
-                      label: Text(ad.category),
-                      backgroundColor:
-                          AppColors.primary.withValues(alpha: 0.1),
-                    ),
-                  ),
                 Text(
                   ad.catchCopy,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -115,11 +136,17 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
                 _InfoCard(
                   title: '配信情報',
                   children: [
-                    _infoRow('配信開始日', AppDateFormats.yearMonthDay.format(ad.startDate)),
-                    _infoRow('配信終了日', AppDateFormats.yearMonthDay.format(ad.endDate)),
+                    _infoRow(
+                      '配信開始日',
+                      AppDateFormats.yearMonthDay.format(ad.startDate),
+                    ),
+                    _infoRow(
+                      '配信終了日',
+                      AppDateFormats.yearMonthDay.format(ad.endDate),
+                    ),
                     _infoRow('配信日数', '${ad.distributionDays}日'),
                     _infoRow('カテゴリー', ad.category),
-                    if (!isMemberMode)
+                    if (!isDistributorMode)
                       _infoRow(
                         '広告料金',
                         PricingCalculator.formatYen(total),
@@ -137,7 +164,7 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
                     ],
                   ),
                 ],
-                if (!isMemberMode) ...[
+                if (!isDistributorMode) ...[
                   const SizedBox(height: 16),
                   _InfoCard(
                     title: 'オプション',
@@ -162,11 +189,9 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
                   title: '投稿者情報',
                   children: [
                     _infoRow('会社名', ad.advertiserCompanyName),
-                    if (!isMemberMode)
-                      _infoRow('URL', ad.advertiserUrl),
+                    _infoRow('URL', ad.advertiserUrl),
                     _infoRow('TEL', ad.advertiserTel),
-                    if (!isMemberMode)
-                      _infoRow('担当者', ad.advertiserContact),
+                    _infoRow('担当者', ad.advertiserContact),
                   ],
                 ),
                 const SizedBox(height: 80),
@@ -200,15 +225,32 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: FilledButton.icon(
-            onPressed: () =>
-                ref.read(favoritesProvider.notifier).toggle(ad.id),
-            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-            label: Text(isFavorite ? 'お気に入り済み' : 'お気に入りに追加'),
-            style: FilledButton.styleFrom(
-              backgroundColor:
-                  isFavorite ? Colors.red.shade400 : AppColors.primary,
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () =>
+                      ref.read(favoritesProvider.notifier).toggle(ad.id),
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                  ),
+                  label: Text(isFavorite ? 'お気に入り済み' : 'お気に入り'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor:
+                        isFavorite ? Colors.red.shade400 : AppColors.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      showMockPhoneSnackBar(context, ad.advertiserTel),
+                  icon: const Icon(Icons.phone_outlined),
+                  label: const Text('電話'),
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -232,8 +274,7 @@ class _AdDetailPageState extends ConsumerState<AdDetailPage> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: FilledButton(
-            onPressed: () =>
-                ref.read(adRepositoryProvider.notifier).toggleDistributing(ad.id),
+            onPressed: () => confirmToggleDistributing(context, ref, ad),
             style: FilledButton.styleFrom(
               backgroundColor: ad.isDistributing
                   ? AppColors.distributing

@@ -9,6 +9,8 @@ import '../../models/ad_form_state.dart';
 import '../../providers/ad_form_provider.dart';
 import '../../utils/pricing_calculator.dart';
 import '../../widgets/ad_card_consumer.dart';
+import '../../widgets/ad_thumbnail.dart';
+import '../../widgets/ideal/consumer/feed_ad_card.dart';
 
 class AdPostPage extends ConsumerWidget {
   const AdPostPage({super.key, this.adId});
@@ -28,7 +30,7 @@ class AdPostPage extends ConsumerWidget {
       hasDistributionSettingNotification:
           form.hasDistributionSettingNotification,
     );
-    final maxStep = form.isEditMode ? 2 : 4;
+    final maxStep = form.isEditMode ? 1 : 4;
 
     return Scaffold(
       appBar: AppBar(
@@ -38,8 +40,12 @@ class AdPostPage extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Stepper(
-        currentStep: form.currentStep,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Stepper(
+          type: StepperType.vertical,
+          currentStep: form.currentStep,
+          physics: const NeverScrollableScrollPhysics(),
         onStepContinue: () async {
           final error = notifier.validateStep(form.currentStep);
           if (error != null) {
@@ -128,6 +134,7 @@ class AdPostPage extends ConsumerWidget {
                         onTap: () => notifier.updateThumbnailAssetPath(path),
                         child: Container(
                           width: 72,
+                          height: 100,
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: selected
@@ -137,7 +144,15 @@ class AdPostPage extends ConsumerWidget {
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Image.asset(path, fit: BoxFit.cover),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(7),
+                            child: AdThumbnail(
+                              assetPath: path,
+                              width: 72,
+                              height: 100,
+                              borderRadius: 0,
+                            ),
+                          ),
                         ),
                       );
                     },
@@ -153,10 +168,11 @@ class AdPostPage extends ConsumerWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      form.thumbnailAssetPath,
-                      fit: BoxFit.cover,
+                    child: AdThumbnail(
+                      assetPath: form.thumbnailAssetPath,
                       width: double.infinity,
+                      height: 160,
+                      borderRadius: 0,
                     ),
                   ),
                 ),
@@ -206,6 +222,7 @@ class AdPostPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
+                  key: ValueKey('category-${form.editingAdId}-${form.category}'),
                   initialValue: form.category,
                   decoration: const InputDecoration(
                     labelText: 'カテゴリー',
@@ -224,6 +241,7 @@ class AdPostPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
+                  key: ValueKey('prefecture-${form.editingAdId}-${form.prefecture}'),
                   initialValue: form.prefecture,
                   decoration: const InputDecoration(
                     labelText: '配信地域',
@@ -240,11 +258,29 @@ class AdPostPage extends ConsumerWidget {
                     if (value != null) notifier.updatePrefecture(value);
                   },
                 ),
+                const SizedBox(height: 16),
+                ExpansionTile(
+                  title: const Text('会員プレビュー'),
+                  subtitle: const Text('会員フィードでの表示イメージ'),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          width: 320,
+                          child: FeedAdCard(ad: form.toPreviewAd()),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          Step(
-            title: const Text('配信設定'),
+          if (!form.isEditMode)
+            Step(
+              title: const Text('配信設定'),
             isActive: form.currentStep >= 2,
             state: form.currentStep > 2 && !form.isEditMode
                 ? StepState.complete
@@ -293,6 +329,7 @@ class AdPostPage extends ConsumerWidget {
                   ),
                 ),
                 DropdownButtonFormField<int>(
+                  key: ValueKey('days-${form.editingAdId}-${form.distributionDays}'),
                   initialValue: form.distributionDays,
                   decoration: const InputDecoration(
                     labelText: '配信日数（1〜90日）',
@@ -434,6 +471,7 @@ class AdPostPage extends ConsumerWidget {
               ),
             ),
         ],
+        ),
       ),
     );
   }
